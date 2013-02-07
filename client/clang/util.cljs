@@ -7,7 +7,7 @@
    (aset target (name n) value)))
 
 (defn ?
-  ([x] (.log js/console (str x)) x)
+  ([x] (.log js/console (str x) x) x)
   ([x y] (.log js/console (str x) (str y) y) y))
 
 (def modules (atom {}))

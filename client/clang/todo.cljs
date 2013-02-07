@@ -1,5 +1,6 @@
 (ns clang.todo
-  (:require-macros [clang.angular :refer [def.controller defn.scope $]])
+  (:require-macros [clang.angular :refer [def.controller defn.scope $ def.filter]])
+  (:require [clojure.string :as cs])
   (:use [clang.util :only [? ! module]]))
 
 (def m (module "clang.todo"))
@@ -21,4 +22,5 @@
 
   (defn.scope archive []
     ($ todos (into-array (remove #(aget % "done") ($ todos))))))
+
 
