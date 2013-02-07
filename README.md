@@ -1,13 +1,18 @@
 # clang
 
-A Clojure library designed to ... well, that part is up to you.
+An example of using ClojureScript with
+[Angular.js](http://angularjs.org/)
 
 ## Usage
 
-FIXME
+
+```
+lein cljsbuild auto dev
+open resources/public/index.html
+```
 
 ## License
 
-Copyright © 2013 FIXME
+Copyright © 2013 Darrick Wiebe
 
 Distributed under the Eclipse Public License, the same as Clojure.
