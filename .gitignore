@@ -10,6 +10,7 @@ pom.xml.asc
 .lein-failures
 .lein-plugins
 .lein-repl-history
+/resources/public/js/clang*.js
 comp
 out
 repl

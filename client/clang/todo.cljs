@@ -1,39 +1,24 @@
 (ns clang.todo
-  (:require-macros [clang.angular :refer [module controller]])
-  (:use [clang.util :only [? !]]))
-
-; function TodoCtrl($scope) {
-;   $scope.todos = [
-;     {text:'learn angular', done:true},
-;     {text:'build an angular app', done:false}];
-;
-;   $scope.addTodo = function() {
-;     $scope.todos.push({text:$scope.todoText, done:false});
-;     $scope.todoText = '';
-;   };
-;
-;   $scope.remaining = function() {
-;     var count = 0;
-;     angular.forEach($scope.todos, function(todo) {
-;       count += todo.done ? 0 : 1;
-;     });
-;     return count;
-;   };
-;
-;   $scope.archive = function() {
-;     var oldTodos = $scope.todos;
-;     $scope.todos = [];
-;     angular.forEach(oldTodos, function(todo) {
-;       if (!todo.done) $scope.todos.push(todo);
-;     });
-;   };
-; }
-;
+  (:require-macros [clang.angular :refer [def.controller defn.scope $]])
+  (:use [clang.util :only [? ! module]]))
 
 (def m (module "clang.todo"))
 
+(def.controller m TodoCtrl [$scope]
+  ($ todos (array (js-obj "text" "learn angular", "done" true)
+                  (js-obj "text" "learn clojurescript" "done" true)
+                  (js-obj "text" "build an app", "done" false)))
 
-(controller TodoCtrl m [$scope]
-  (! $scope "todos" [{:text "learn angular", :done true}
-                     {:text "build an app", :done false}]))
+  (defn.scope addTodo []
+    (.. ($ todos)
+      (push (js-obj "text" ($ todoText) "done" false)))
+    ($ todoText ""))
+
+  (defn.scope remaining []
+    (->> ($ todos)
+      (remove #(aget % "done"))
+      count))
+
+  (defn.scope archive []
+    ($ todos (into-array (remove #(aget % "done") ($ todos))))))
 

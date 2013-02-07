@@ -6,7 +6,7 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.4.0"]
                  [domina "1.0.0"]]
-  :source-paths ["comp/clojurescript/src/cljs"]
+  ;:source-paths ["comp/clojurescript/src/cljs"]
   :plugins [[lein-cljsbuild "0.3.0"]]
 
 

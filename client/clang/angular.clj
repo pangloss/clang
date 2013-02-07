@@ -4,14 +4,14 @@
 (defmacro fnj [args & body]
   `(clojure.core/array ~@(map name args) (fn ~args ~@body)))
 
-(defmacro controller [n app args & body]
-  `(.controller ~app ~(name n) (fnj ~args ~@body)))
+(defmacro def.controller [module n args & body]
+  `(.controller ~module ~(name n) (fnj ~args ~@body)))
 
-(defmacro module
-  ([n]
-   `(module ~n []))
-  ([n deps]
-   `(.module
-       (.-angular js/window)
-       ~(name n)
-       (clojure.core/array ~@(map name deps)))))
+; Defines a function on the current $scope
+(defmacro defn.scope [n args & body]
+  `(aset ~'$scope ~(name n) (fn ~args ~@body)))
+
+; Gets or sets a value to a $scope variable
+(defmacro $
+  ([k] `(aget ~'$scope ~(name k)))
+  ([k v] `(aset ~'$scope ~(name k) ~v)))
