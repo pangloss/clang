@@ -2,7 +2,9 @@
 
 ; Function with dependancy injection metadata for angular
 (defmacro fnj [args & body]
-  `(clojure.core/array ~@(map name args) (fn ~args ~@body)))
+  (if (empty? args)
+    `(fn [] ~@body)
+    `(clojure.core/array ~@(map name args) (fn ~args ~@body))))
 
 (defmacro def.controller [module n args & body]
   `(.controller ~module ~(name n) (fnj ~args ~@body)))
