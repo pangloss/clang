@@ -68,4 +68,4 @@
                    (.remove element)
                    (.$destroy scope))
                  (reset! lastOrder @nextOrder)))
-             ))))))
+             true))))))
