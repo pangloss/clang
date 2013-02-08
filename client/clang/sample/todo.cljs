@@ -1,14 +1,8 @@
 (ns clang.todo
-  (:require-macros [clang.angular :refer [def.controller defn.scope $ def.filter]])
-  (:require [clojure.string :as cs])
+  (:require-macros [clang.angular :refer [def.controller defn.scope $ def.filter fnj]])
+  (:require [clojure.string :as cs]
+            clang.directive.clangRepeat)
   (:use [clang.util :only [? ! module]]))
-
-(def app (module "app" [:clang.todo]))
-
-(.config app
-   (fnj [$routeProvider $locationProvider]
-        ; Without server side support html5 must be disabled.
-        (.html5Mode $locationProvider false)))
 
 ; causes the todo controller to be initialized twice. I guess because
 ; the html page refers to the clang.todo module directly.
@@ -18,12 +12,12 @@
 ;           (.bootstrap angular
 ;              js/document (array "app")))))
 
-(def m (module "clang.todo"))
+(def m (module "clang.todo" ["clang"]))
 
 (def.controller m TodoCtrl [$scope]
-  ($ todos (array (js-obj "text" "learn angular", "done" true)
-                  (js-obj "text" "learn clojurescript" "done" true)
-                  (js-obj "text" "build an app", "done" false)))
+  ($ todos [(js-obj "text" "learn angular", "done" true)
+            (js-obj "text" "learn clojurescript" "done" true)
+            (js-obj "text" "build an app", "done" false)])
 
   (defn.scope addTodo []
     (.. ($ todos)
