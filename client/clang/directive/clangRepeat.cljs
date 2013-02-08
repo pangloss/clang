@@ -26,11 +26,16 @@
                                               (re-find #"^(?:()([\$\w]+))$" lhs))
               _ (when-not match
                   (throw (js/Error. (str "'item' in 'item in collection' should be identifier or (key, value) but got '" lhs "'."))))
-              lastOrder (atom (array-map))]
-          (.$watch scope rhs
+              lastOrder (atom (array-map))
+              prevValue (atom nil)]
+          (.$watch scope
+            (fn []
+              (? "check")
+              (.$eval scope rhs))
              (fn clangRepeatWatch []
-               (let [collection (.$eval scope rhs)
-                     collection (if (coll? collection) collection [])
+               (? "run")
+               (let [raw-value (.$eval scope rhs)
+                     collection (if (coll? raw-value) raw-value [])
                      arrayLength (count collection)
                      collection (kv-seq collection)
                      nextOrder (atom (array-map))
@@ -47,6 +52,7 @@
                                         (reset! cursor (:element last))
                                         (:scope last))
                                       (.$new scope))]
+
                      (aset childScope valueIdent value)
                      (when keyIdent
                        (aset childScope keyIdent key))
@@ -55,7 +61,8 @@
                      (aset childScope "$last" (= index (dec arrayLength)))
                      (aset childScope "$middle" (not (or (zero? index)
                                                          (= index (dec arrayLength)))))
-                     (when-not last
+                     (when-not (@lastOrder value)
+                       (? "link" value)
                        (linker childScope (fn [clone]
                                             (.after @cursor clone)
                                             (reset! cursor clone)
@@ -67,5 +74,6 @@
                  (doseq [[key {:keys [element scope]}] @lastOrder]
                    (.remove element)
                    (.$destroy scope))
-                 (reset! lastOrder @nextOrder)))
+                 (reset! lastOrder @nextOrder)
+                 raw-value))
              true))))))

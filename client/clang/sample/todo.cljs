@@ -20,8 +20,8 @@
             (js-obj "text" "build an app", "done" false)])
 
   (defn.scope addTodo []
-    (.. ($ todos)
-      (push (js-obj "text" ($ todoText) "done" false)))
+    (conj ($ todos)
+          (js-obj "text" ($ todoText) "done" false))
     ($ todoText ""))
 
   (defn.scope remaining []
@@ -30,6 +30,6 @@
       count))
 
   (defn.scope archive []
-    ($ todos (into-array (remove #(aget % "done") ($ todos))))))
+    ($ todos (remove #(aget % "done") ($ todos)))))
 
 
