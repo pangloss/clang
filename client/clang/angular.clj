@@ -41,5 +41,9 @@
 
 ; Gets or sets a value to a $scope variable
 (defmacro $
-  ([k] `(aget ~'$scope ~(name k)))
-  ([k v] `(aset ~'$scope ~(name k) ~v)))
+  ([k]
+   (let [k (if (coll? k) (map name k) (name k))]
+     `(clang.util/! ~'$scope ~k)))
+  ([k v]
+   (let [k (if (coll? k) (map name k) (name k))]
+     `(clang.util/! ~'$scope ~k ~v))))

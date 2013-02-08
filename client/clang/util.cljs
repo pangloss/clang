@@ -2,9 +2,23 @@
 
 (defn !
   ([target n]
-   (aget target (name n)))
+   (if (coll? n)
+     (let [[n & nn] n]
+       (if (seq nn)
+         (recur (! target n) nn)
+         (recur target n)))
+     (aget target (name n))))
   ([target n value]
-   (aset target (name n) value)))
+   (if (coll? n)
+     (let [[n & nn] n]
+       (if (seq nn)
+         (recur (or (! target n)
+                    (let [x (js-obj)]
+                      (! target n x)
+                      x))
+                nn value)
+         (recur target n value)))
+     (aset target (name n) value))))
 
 (defn ?
   ([x] (.log js/console (str x) x) x)
@@ -28,3 +42,4 @@
          m)))))
 
 
+(def amerge goog.object/extend)
