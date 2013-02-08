@@ -3,6 +3,21 @@
   (:require [clojure.string :as cs])
   (:use [clang.util :only [? ! module]]))
 
+(def app (module "app" [:clang.todo]))
+
+(.config app
+   (fnj [$routeProvider $locationProvider]
+        ; Without server side support html5 must be disabled.
+        (.html5Mode $locationProvider false)))
+
+; causes the todo controller to be initialized twice. I guess because
+; the html page refers to the clang.todo module directly.
+;(.. angular
+;  (element js/document)
+;  (ready (fn []
+;           (.bootstrap angular
+;              js/document (array "app")))))
+
 (def m (module "clang.todo"))
 
 (def.controller m TodoCtrl [$scope]
