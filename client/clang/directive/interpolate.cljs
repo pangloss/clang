@@ -1,26 +1,40 @@
 (ns clang.directive.interpolate
   (:require-macros [clang.angular :refer [def.value def.provider fnj]])
   (:require [clojure.string :as cs]
-            [cljs.reader :refer [read-string]])
+            [cljs.reader :refer [read-string]]
+            [clojure.walk :refer [postwalk]])
   (:use [clang.util :only [? ! module]]))
 
 (def m (module "clang"))
 
 (def exception-handler (atom nil))
+(def parse (atom nil))
 
 (defn context-eval [form context]
+  (? "?" (array form context))
   "oh yeah")
 
 (defn parse-section [data]
-  (partial context-eval (read-string (str "[" data "]"))))
+  (if (re-find #"^\(.*\)$" data)
+    (partial context-eval (read-string data))
+    (@parse data)))
+
+(def start "{{")
+(def end "}}")
+(def re-start #"\{\{")
+(def re-end #"}}")
+
+(defn plain-text [text]
+  (fn [_] text))
 
 (defn close-and-parse [text]
-  (let [[data & strings] (cs/split "]]" text)]
-    [(parse-section data) (fn [_] (cs/join "]]" strings))]))
+  (let [[to-parse text] (cs/split text re-end 2)]
+    [(parse-section to-parse) (plain-text text)]))
 
 (defn parse-sections [text]
-  (->> (cs/split text "[[")
-    (mapcat close-and-parse)))
+  (let [[text & parts] (cs/split text re-start)]
+    (concat [(plain-text text)]
+            (mapcat close-and-parse parts))))
 
 (defn interpolate
   ([text]
@@ -40,9 +54,9 @@
   ([text mustHaveExpression] (interpolate text)))
 
 
-(def $get (fnj [$exceptionHandler]
-  (when-not @exception-handler
-    (reset! exception-handler $exceptionHandler))
+(def $get (fnj [$parse $exceptionHandler]
+  (reset! parse $parse)
+  (reset! exception-handler $exceptionHandler)
   interpolate))
 
 (declare InterpolateProvider)
