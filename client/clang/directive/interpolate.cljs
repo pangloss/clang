@@ -1,57 +1,73 @@
 (ns clang.directive.interpolate
-  (:require-macros [clang.angular :refer [def.value fnj]])
+  (:require-macros [clang.angular :refer [def.value def.provider fnj]])
   (:require [clojure.string :as cs]
             [cljs.reader :refer [read-string]])
   (:use [clang.util :only [? ! module]]))
 
 (def m (module "clang"))
 
+(def exception-handler (atom nil))
+
 (defn context-eval [form context]
   "oh yeah")
 
-(def interpolate-provider (js* "function () {}"))
+(defn parse-section [data]
+  (partial context-eval (read-string (str "[" data "]"))))
 
-(def $get
-  (fnj [$exceptionHandler]
-       (? "$get")
-       (letfn [(parse-section [data]
-                 (partial context-eval (read-string (str "[" data "]"))))
-               (close-and-parse [text]
-                 (let [[data & strings] (cs/split "]]" text)]
-                   [(parse-section data) (fn [_] (cs/join "]]" strings))]))
-               (parse-sections [text]
-                 (-> text
-                   (cs/split "[[")
-                   (->>
-                     (mapcat close-and-parse))))
-               ($interpolate [text mustHaveExpression]
-                 (let [parts (parse-sections text)
-                       f (fn [context]
-                           (try
-                             (->> parts
-                               (map #(% context))
-                               (cs/join ""))
-                             (catch js/Error e
-                               (? (str "error while interpolating '" text "'") e)
-                               ($exceptionHandler
-                                 (js/Error. (str "error while interpolating '" text "'\n" (.toString e)))))))]
-                   (aset f "exp" text)
-                   (aset f "parts" parts)
-                   f))]
-         (aset $interpolate "startSymbol" "[[")
-         (aset $interpolate "endSymbol"   "]]")
-         $interpolate)))
+(defn close-and-parse [text]
+  (let [[data & strings] (cs/split "]]" text)]
+    [(parse-section data) (fn [_] (cs/join "]]" strings))]))
+
+(defn parse-sections [text]
+  (->> (cs/split text "[[")
+    (mapcat close-and-parse)))
+
+(defn interpolate
+  ([text]
+   (let [parts (parse-sections text)
+         f (fn [context]
+             (try
+               (->> parts
+                 (map #(% context))
+                 (cs/join ""))
+               (catch js/Error e
+                 (? (str "error while interpolating '" text "'") e)
+                 (@exception-handler
+                   (js/Error. (str "error while interpolating '" text "'\n" (.toString e)))))))]
+     (aset f "exp" text)
+     (aset f "parts" parts)
+     f))
+  ([text mustHaveExpression] (interpolate text)))
+
+
+(def $get (fnj [$exceptionHandler]
+  (when-not @exception-handler
+    (reset! exception-handler $exceptionHandler))
+  interpolate))
+
+(declare InterpolateProvider)
 
 (defn startSymbol
   ([] "[[")
-  ([value] (? "change ss to " value) startSymbol))
+  ([value] (? "change ss to " value) (js* "this")))
 
 (defn endSymbol
   ([] "]]")
-  ([value] endSymbol))
+  ([value] (js* "this")))
 
-(aset interpolate-provider "startSymbol" startSymbol)
-(aset interpolate-provider "endSymbol"   endSymbol)
-(aset interpolate-provider "$get"        $get)
+(aset interpolate "startSymbol" startSymbol)
+(aset interpolate "endSymbol"   endSymbol)
 
-(def.value m $interpolate interpolate-provider)
+(defn InterpolateProvider []
+  (aset (js* "this") "startSymbol" startSymbol)
+  (aset (js* "this") "endSymbol"   endSymbol)
+  (aset (js* "this") "$get" $get)
+  ; a js constructor that returns something causes problems
+  nil)
+
+(def.provider m $interpolate (InterpolateProvider.))
+
+;(def.provider m $interpolate InterpolateProvider [$exceptionHandler]
+;  (when-not @exception-handler
+;    (reset! exception-handler $exceptionHandler))
+;  interpolate)
