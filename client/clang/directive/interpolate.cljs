@@ -21,7 +21,7 @@
     (re-find #"^\(.*\)$" data)
       (partial p/context-eval @parse (read-string data))
     (= \: (first data))
-      (partial p/keyword-eval (read-string data))
+      (partial p/context-eval @parse (read-string (str "(" data ")")))
     :else (@parse data)))
 
 (defn plain-text [text]

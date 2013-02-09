@@ -3,15 +3,20 @@
   (:require-macros
     [clang.angular :refer [fn-symbol-map]]))
 
-(def functions (fn-symbol-map count str))
+(def fn-syms
+  (fn-symbol-map
+    count str first last second ffirst rest next fnext nfirst nnext nthnext
+    sort reverse deref rand rand-int > < >= <= not= inc dec max min nth get
+    clj->js not + - * / rem mod keys vals true? false? nil? = == ))
+
+(defn function [sym]
+  (if (keyword? sym)
+    sym
+    (fn-syms (name sym))))
 
 (defn exec-list [sym args]
-  (if-let [f (functions (name sym))]
-    (do
-      (? "-->" [sym args])
-      (if args
-        (apply f args)
-        (f)))
+  (if-let [f (function sym)]
+    (apply f args)
     (str (apply list sym args))))
 
 (defn context-eval [parser form context]
@@ -21,7 +26,3 @@
     (symbol? form) (or ((parser (name form)) context)
                        form)
     :else form))
-
-(defn keyword-eval [kw context]
-  (? "kwe" [kw context])
-  (str kw))

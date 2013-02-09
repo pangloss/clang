@@ -15,21 +15,21 @@
 (def m (module "clang.todo" ["clang"]))
 
 (def.controller m TodoCtrl [$scope]
-  ($ todos [(js-obj "text" "learn angular", "done" true)
-            (js-obj "text" "learn clojurescript" "done" true)
-            (js-obj "text" "build an app", "done" false)])
+  ($ todos [{:text "learn angular" :done true}
+            {:text "learn cljs" :done true}
+            {:text "build an app" :done false}])
 
   (defn.scope addTodo []
     ($ todos (conj ($ todos)
-                   (js-obj "text" ($ todoText) "done" false)))
+                   {:text ($ todoText) :done false}))
     ($ todoText ""))
 
   (defn.scope remaining []
     (->> ($ todos)
-      (remove #(aget % "done"))
+      (remove :done)
       count))
 
   (defn.scope archive []
-    ($ todos (remove #(aget % "done") ($ todos)))))
+    ($ todos (remove :done ($ todos)))))
 
 
