@@ -20,8 +20,8 @@
             (js-obj "text" "build an app", "done" false)])
 
   (defn.scope addTodo []
-    (conj ($ todos)
-          (js-obj "text" ($ todoText) "done" false))
+    ($ todos (conj ($ todos)
+                   (js-obj "text" ($ todoText) "done" false)))
     ($ todoText ""))
 
   (defn.scope remaining []

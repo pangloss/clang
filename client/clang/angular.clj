@@ -21,6 +21,9 @@
 (defmacro def.value [module n value]
   `(.value ~module ~(name n) ~value))
 
+(defmacro def.fn [module n args & body]
+  `(.value ~module ~(name n) (fn ~args ~@body)))
+
 ; (def.filter m niceDate [$filter] [d]
 ;   (($filter "date") d "shortDate")
 ;

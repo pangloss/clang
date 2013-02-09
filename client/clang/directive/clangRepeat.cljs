@@ -1,6 +1,6 @@
 (ns clang.directive.clangRepeat
-  (:require-macros [clang.angular :refer [def.directive defn.scope $]])
-  (:require [clojure.string :as cs])
+  (:require-macros [clang.angular :refer [def.directive def.fn]])
+  (:require clang.directive.interpolate)
   (:use [clang.util :only [? ! module]]))
 
 (def m (module "clang"))
@@ -9,6 +9,7 @@
   (if (map? collection)
     collection
     (map (fn [v] [nil v]) collection)))
+
 
 (def.directive m clangRepeat []
   (js-obj
@@ -30,17 +31,14 @@
               prevValue (atom nil)]
           (.$watch scope
             (fn []
-              (? "check")
               (.$eval scope rhs))
              (fn clangRepeatWatch []
-               (? "run")
                (let [raw-value (.$eval scope rhs)
                      collection (if (coll? raw-value) raw-value [])
                      arrayLength (count collection)
                      collection (kv-seq collection)
                      nextOrder (atom (array-map))
-                     cursor (atom iterStartElement)
-                     ]
+                     cursor (atom iterStartElement)]
                  (loop [index 0 [key value] (first collection) collection (next collection)]
                    (let [childScope (if-let [last (@lastOrder value)]
                                       (do
@@ -62,7 +60,6 @@
                      (aset childScope "$middle" (not (or (zero? index)
                                                          (= index (dec arrayLength)))))
                      (when-not (@lastOrder value)
-                       (? "link" value)
                        (linker childScope (fn [clone]
                                             (.after @cursor clone)
                                             (reset! cursor clone)
