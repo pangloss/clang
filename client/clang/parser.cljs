@@ -31,11 +31,10 @@
 
 (defn parse [ng-parse data]
   (if-let [data (cond
-                  (or (= \@ (first data))
-                      (re-find #"^\(.*\)$" data))
-                    data
-                  (re-find #"^:\S+$" data) (str "(" data " $value)")
-                  (= \: (first data)) (str "(" data ")"))]
+                  (re-find #"^:\S+$" data)   (str "(" data " $value)")
+                  (re-find #"^\(.*\)$" data) data
+                  (= \: (first data))        (str "(" data ")")
+                  (= \@ (first data))        data)]
     (partial context-eval ng-parse (read-string data))
     (ng-parse data)))
 
