@@ -1,6 +1,7 @@
 (ns clang.directive.clangRepeat
   (:require-macros [clang.angular :refer [def.directive def.fn]])
-  (:require clang.directive.interpolate)
+  (:require clang.directive.interpolate
+            [clang.parser :as p])
   (:use [clang.util :only [? ! module]]))
 
 (def m (module "clang"))
@@ -11,7 +12,8 @@
     (map (fn [v] [nil v]) collection)))
 
 
-(def.directive m clangRepeat []
+;; This started as a line-by-line port of ngRepeat.
+(def.directive m clangRepeat [$parse]
   (js-obj
     "transclude" "element"
     "priority" 1000
@@ -22,18 +24,22 @@
         (let [expression (.-clangRepeat attr)
               [match lhs rhs] (re-find #"^\s*(.+)\s+in\s+(.*)\s*$" expression)
               _ (when-not match
-                  (throw (js/Error. (str "Expected ngRepeat in form of '_item_ in _collection_' but got '" expression "'."))))
+                  (throw (js/Error. (str "Expected ngRepeat in form of "
+                                         "'_item_ in _collection_' but got '"
+                                         expression "'."))))
               [match keyIdent valueIdent] (or (re-find #"^(?:\(([\$\w]+)\s*,\s*([\$\w]+)\))$" lhs)
                                               (re-find #"^(?:()([\$\w]+))$" lhs))
               _ (when-not match
-                  (throw (js/Error. (str "'item' in 'item in collection' should be identifier or (key, value) but got '" lhs "'."))))
+                  (throw (js/Error. (str "'item' in 'item in collection' "
+                                         "should be identifier or (key, value) "
+                                         "but got '" lhs "'."))))
               lastOrder (atom (array-map))
               prevValue (atom nil)]
           (.$watch scope
             (fn []
-              (.$eval scope rhs))
+              #_((p/parse $parse rhs) scope))
              (fn clangRepeatWatch []
-               (let [raw-value (.$eval scope rhs)
+               (let [raw-value ((p/parse $parse rhs) scope)
                      collection (if (coll? raw-value) raw-value [])
                      arrayLength (count collection)
                      collection (kv-seq collection)
@@ -52,7 +58,9 @@
                                       (.$new scope))]
 
                      (aset childScope valueIdent value)
+                     (aset childScope "$value" value)
                      (when keyIdent
+                       (aset childScope "$key" key)
                        (aset childScope keyIdent key))
                      (aset childScope "$index" index)
                      (aset childScope "$first" (zero? index))
