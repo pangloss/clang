@@ -53,3 +53,8 @@
   ([k v]
    (let [k (if (coll? k) (map name k) (name k))]
      `(clang.util/! ~'$scope ~k ~v))))
+
+(defmacro fn-symbol-map [& syms]
+  (->> syms
+    (map (juxt name identity))
+    (into {})))

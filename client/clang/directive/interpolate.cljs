@@ -1,28 +1,28 @@
 (ns clang.directive.interpolate
-  (:require-macros [clang.angular :refer [def.value def.provider fnj]])
+  (:require-macros
+    [clang.angular :refer [def.value def.provider fnj]])
   (:require [clojure.string :as cs]
             [cljs.reader :refer [read-string]]
-            [clojure.walk :refer [postwalk]])
+            [clang.parser :as p])
   (:use [clang.util :only [? ! module]]))
+
+(def start "{{")
+(def end "}}")
+(def re-start #"\{\{")
+(def re-end #"}}")
 
 (def m (module "clang"))
 
 (def exception-handler (atom nil))
 (def parse (atom nil))
 
-(defn context-eval [form context]
-  (? "?" (array form context))
-  "oh yeah")
-
 (defn parse-section [data]
-  (if (re-find #"^\(.*\)$" data)
-    (partial context-eval (read-string data))
-    (@parse data)))
-
-(def start "{{")
-(def end "}}")
-(def re-start #"\{\{")
-(def re-end #"}}")
+  (cond
+    (re-find #"^\(.*\)$" data)
+      (partial p/context-eval @parse (read-string data))
+    (= \: (first data))
+      (partial p/keyword-eval (read-string data))
+    :else (@parse data)))
 
 (defn plain-text [text]
   (fn [_] text))
