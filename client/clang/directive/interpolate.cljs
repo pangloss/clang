@@ -2,7 +2,6 @@
   (:require-macros
     [clang.angular :refer [def.value def.provider fnj]])
   (:require [clojure.string :as cs]
-            [cljs.reader :refer [read-string]]
             [clang.parser :as p])
   (:use [clang.util :only [? ! module]]))
 
@@ -14,22 +13,14 @@
 (def m (module "clang"))
 
 (def exception-handler (atom nil))
-(def parse (atom nil))
-
-(defn parse-section [data]
-  (cond
-    (re-find #"^\(.*\)$" data)
-      (partial p/context-eval @parse (read-string data))
-    (= \: (first data))
-      (partial p/context-eval @parse (read-string (str "(" data ")")))
-    :else (@parse data)))
+(def ng-parse (atom nil))
 
 (defn plain-text [text]
   (fn [_] text))
 
 (defn close-and-parse [text]
   (let [[to-parse text] (cs/split text re-end 2)]
-    [(parse-section to-parse) (plain-text text)]))
+    [(p/parse @ng-parse to-parse) (plain-text text)]))
 
 (defn parse-sections [text]
   (let [[text & parts] (cs/split text re-start)]
@@ -55,7 +46,7 @@
 
 
 (def $get (fnj [$parse $exceptionHandler]
-  (reset! parse $parse)
+  (reset! ng-parse $parse)
   (reset! exception-handler $exceptionHandler)
   interpolate))
 

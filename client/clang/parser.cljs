@@ -1,5 +1,6 @@
 (ns clang.parser
   (:use [clang.util :only [? ! module]])
+  (:require [cljs.reader :refer [read-string]])
   (:require-macros
     [clang.angular :refer [fn-symbol-map]]))
 
@@ -21,8 +22,20 @@
 
 (defn context-eval [parser form context]
   (cond
-    (list? form) (exec-list (first form) (when-let [form (next form)]
-                                           (map #(context-eval parser % context) form)))
+    (list? form) (exec-list (first form)
+                            (when-let [form (next form)]
+                              (map #(context-eval parser % context) form)))
     (symbol? form) (or ((parser (name form)) context)
                        form)
     :else form))
+
+(defn parse [ng-parse data]
+  (if-let [data (cond
+                  (or (= \@ (first data))
+                      (re-find #"^\(.*\)$" data))
+                    data
+                  (re-find #"^:\S+$" data) (str "(" data " $value)")
+                  (= \: (first data)) (str "(" data ")"))]
+    (partial context-eval ng-parse (read-string data))
+    (ng-parse data)))
+
