@@ -4,15 +4,10 @@
             clang.directive.clangRepeat)
   (:use [clang.util :only [? ! module]]))
 
-; causes the todo controller to be initialized twice. I guess because
-; the html page refers to the clang.todo module directly.
-;(.. angular
-;  (element js/document)
-;  (ready (fn []
-;           (.bootstrap angular
-;              js/document (array "app")))))
-
 (def m (module "clang.todo" ["clang"]))
+
+
+;;; This controller uses regular clojure data
 
 (def.controller m TodoCtrl [$scope]
   ($ todos [{:text "learn angular" :done true}
@@ -30,6 +25,32 @@
       count))
 
   (defn.scope archive []
+    (? "a1")
     ($ todos (remove :done ($ todos)))))
+
+
+
+
+;;; This controller is identical but uses an atom for the todo data
+
+(def.controller m AtomTodoCtrl [$scope]
+  ($ todos (atom [{:text "learn angular" :done true}
+                  {:text "learn cljs" :done true}
+                  {:text "learn about software transactional memory" :done true}
+                  {:text "build an app" :done false}]))
+
+  (defn.scope addTodo []
+    (swap! ($ todos)
+           conj {:text ($ todoText) :done false})
+    ($ todoText ""))
+
+  (defn.scope remaining []
+    (->> @($ todos)
+      (remove :done)
+      count))
+
+  (defn.scope archive []
+    (? "a2")
+    (swap! ($ todos) (partial remove :done))))
 
 
