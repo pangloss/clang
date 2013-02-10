@@ -105,9 +105,11 @@
   (letfn [(maybe-read [text]
             (try
               (read-string (str "[" text "]"))
-              (catch js/Error e nil)))]
+              (catch js/Error e
+                (? (? "failed to read: " text) e)
+                nil)))]
     (if (= \@(first text))
-      (if-let [form (maybe-read text)]
+      (if-let [form (maybe-read (cs/join "" (rest text)))]
         [(get-atom text form)
          (set-atom text form)]
         nil)
@@ -135,6 +137,7 @@
     :$get
     (fn []
       (fn [exp]
+        (when (string? exp) (? "app" exp))
         (cond
           (string? exp) (if-let [p (@assignable-parse-cache exp)]
                           p
@@ -153,6 +156,7 @@
     :$get
     (fn []
       (fn [exp]
+        (when (string? exp) (? "rpp" exp))
         (cond
           (string? exp) (if-let [p (@read-parse-cache exp)]
                           p

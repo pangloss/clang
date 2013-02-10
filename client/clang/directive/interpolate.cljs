@@ -71,8 +71,3 @@
   nil)
 
 (def.provider m $interpolate (InterpolateProvider.))
-
-;(def.provider m $interpolate InterpolateProvider [$exceptionHandler]
-;  (when-not @exception-handler
-;    (reset! exception-handler $exceptionHandler))
-;  interpolate)
