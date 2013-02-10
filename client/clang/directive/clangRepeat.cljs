@@ -1,7 +1,6 @@
 (ns clang.directive.clangRepeat
   (:require-macros [clang.angular :refer [def.directive def.fn]])
-  (:require clang.directive.interpolate
-            [clang.parser :as p])
+  (:require clang.directive.interpolate)
   (:use [clang.util :only [? ! module]]))
 
 (def m (module "clang"))
@@ -13,7 +12,7 @@
 
 
 ;; This started as a line-by-line port of ngRepeat.
-(def.directive m clangRepeat [$parse]
+(def.directive m clangRepeat [$readParse]
   (js-obj
     "transclude" "element"
     "priority" 1000
@@ -36,7 +35,7 @@
               lastOrder (atom (array-map))
               prevValue (atom nil)]
           (.$watch scope
-             (p/parse rhs)
+             ($readParse rhs)
              (fn clangRepeatWatch [new-val old-val scope]
                (let [collection (if (coll? new-val) new-val [])
                      arrayLength (count collection)
