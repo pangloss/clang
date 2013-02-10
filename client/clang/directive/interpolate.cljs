@@ -1,8 +1,7 @@
 (ns clang.directive.interpolate
   (:require-macros
     [clang.angular :refer [def.value def.provider fnj]])
-  (:require [clojure.string :as cs]
-            [clang.parser :as p])
+  (:require [clojure.string :as cs])
   (:use [clang.util :only [? ! module]]))
 
 (def start "{{")
@@ -13,13 +12,14 @@
 (def m (module "clang"))
 
 (def exception-handler (atom nil))
+(def parse (atom nil))
 
 (defn plain-text [text]
   (fn [_] text))
 
 (defn close-and-parse [text]
   (let [[to-parse text] (cs/split text re-end 2)]
-    [(p/parse to-parse) (plain-text text)]))
+    [(@parse to-parse) (plain-text text)]))
 
 (defn parse-sections [text]
   (let [[text & parts] (cs/split text re-start)]
@@ -45,8 +45,9 @@
   ([text mustHaveExpression] (interpolate text)))
 
 
-(def $get (fnj [$parse $exceptionHandler]
+(def $get (fnj [$readParse $exceptionHandler]
   (reset! exception-handler $exceptionHandler)
+  (reset! parse $readParse)
   interpolate))
 
 (declare InterpolateProvider)
