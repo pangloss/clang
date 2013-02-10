@@ -35,9 +35,9 @@
                  (map #(% context))
                  (cs/join ""))
                (catch js/Error e
-                 (throw e)
-                 (? (str "error while interpolating '" text "'") e)
-                 #_(@exception-handler
+                 #_(throw e)
+                 #_(? (str "error while interpolating '" text "'") e)
+                 (@exception-handler
                    (js/Error. (str "error while interpolating '" text "'\n" (.toString e)))))))]
      (aset f "exp" text)
      (aset f "parts" parts)
