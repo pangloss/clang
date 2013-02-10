@@ -1,9 +1,9 @@
 (ns clang.parser
-  (:use [clang.util :only [? ! module]])
+  (:use [clang.util :only [? ! module extend]])
   (:require [cljs.reader :refer [read-string]]
             [clojure.string :as cs])
   (:require-macros
-    [clang.angular :refer [fn-symbol-map]]))
+    [clang.angular :refer [fnj def.provider fn-symbol-map]]))
 
 (def ng-parse (.get (.injector js/angular (array "ng")) "$parse"))
 
@@ -32,7 +32,92 @@
                        form)
     :else form))
 
-(defn parse [text]
+(defn get-atom [text [a ks]]
+  (cond
+    (sequential? ks)
+    (fn [context]
+      (get-in @(context-eval a context)
+              (map #(context-eval % context) ks)))
+    ks
+    (fn [context]
+      (get @(context-eval a context)
+           (context-eval ks context)))
+    :else
+    (fn [context]
+      @(context-eval a context))))
+
+(defn set-atom [text [a ks]]
+  (cond
+    (sequential? ks)
+    (fn [context value]
+      (swap! (context-eval a context)
+             assoc-in
+             (map #(context-eval % context) ks)
+             value))
+    ks
+    (fn [context value]
+      (swap! (context-eval a context)
+             assoc
+             (context-eval ks context)
+             value))
+    :else
+    (fn [context value]
+      (reset! (context-eval a context)
+              value))))
+
+; To be settable, value must be on the scope, so it can't be a form
+(defn get-value [text [a ks]]
+  (cond
+    (sequential? ks)
+    (fn [context]
+      (get-in ((ng-parse text) context)
+              (map #(context-eval % context) ks)))
+    ks
+    (fn [context]
+      (get ((ng-parse text) context)
+           (context-eval ks context)))
+    :else
+    (ng-parse text)))
+
+; value must be on the scope, so it can't be a form
+;
+; get the value, assoc it and set the result
+(defn set-value [text [a ks]]
+  (cond
+    (sequential? ks)
+    (fn [context value]
+      (let [v (ng-parse text)]
+        (.assign v context
+           (assoc-in (v context)
+                     (map #(context-eval % context) ks)
+                     value))))
+    ks
+    (fn [context value]
+      (let [v (ng-parse text)]
+        (.assign v context
+           (assoc (v context)
+                  (context-eval ks context)
+                  value))))
+    :else
+    (.-assign (ng-parse text))))
+
+(defn assignable-parse [text]
+  (letfn [(maybe-read [text]
+            (try
+              (read-string (str "[" text "]"))
+              (catch js/Error e nil)))]
+    (if (= \@(first text))
+      (if-let [form (maybe-read text)]
+        [(get-atom text form)
+         (set-atom text form)]
+        nil)
+      (if-let [form (maybe-read text)]
+        [(get-value text form)
+         (set-value text form)]
+        (let [p (ng-parse text)]
+          [p (! p :assign)])))))
+
+(defn read-parse [text]
   (if-let [text (cond
                   (re-find #"^:\S+$" text)   (str "(" text " $value)")
                   (re-find #"^\(.*\)$" text) text
@@ -41,83 +126,46 @@
     (partial context-eval (read-string text))
     (ng-parse text)))
 
-(defn get-atom [text]
-  (let [[a ks] (read-string (str "[" text "]"))]
-    (cond
-      (sequential? ks)
-      (fn [context]
-        (get-in @(context-eval a context)
-                (map #(context-eval % context) ks)))
-      ks
-      (fn [context]
-        (get @(context-eval a context)
-             (context-eval ks context)))
-      :else
-      (fn [context]
-        @(context-eval a context)))))
+(def assignable-parse-cache (atom {}))
 
-(defn set-atom [text]
-  (let [[a ks] (read-string (str "[" text "]"))]
-    (cond
-      (sequential? ks)
-      (fn [context value]
-        (swap! (context-eval a context)
-               assoc-in
-               (map #(context-eval % context) ks)
-               value))
-      ks
-      (fn [context value]
-        (swap! (context-eval a context)
-               assoc
-               (context-eval ks context)
-               value))
-      :else
-      (fn [context value]
-        (reset! (context-eval a context)
-                value)))))
+; Should I create 2 parse providers, one for interpolations and another for ng-model, etc parsing?
 
-; To be settable, value must be on the scope, so it can't be a form
-(defn get-value [text]
-  (let [[a ks] (read-string (str "[" text "]"))]
-    (cond
-      (sequential? ks)
-      (fn [context]
-        (get-in ((ng-parse text) context)
-                (map #(context-eval % context) ks)))
-      ks
-      (fn [context]
-        (get ((ng-parse text) context)
-             (context-eval ks context)))
-      :else
-      (ng-parse text))))
+(defn AssignableParseProvider []
+  (extend (js* "this")
+    :$get
+    (fn []
+      (fn [exp]
+        (cond
+          (string? exp) (if-let [p (@assignable-parse-cache exp)]
+                          p
+                          (let [[p a] (assignable-parse exp)]
+                            (aset p "assign" a)
+                            (swap! assignable-parse-cache assoc exp p)
+                            p))
+          (fn? exp) exp
+          :else (fn [& _])))))
+  nil)
 
-; value must be on the scope, so it can't be a form
-;
-; get the value, assoc it and set the result
-(defn set-value [text]
-  (let [[a ks] (read-string (str "[" text "]"))]
-    (cond
-      (sequential? ks)
-      (fn [context value]
-        (let [v (ng-parse text)]
-          (.assign v context
-             (assoc-in (v context)
-                       (map #(context-eval % context) ks)
-                       value))))
-      ks
-      (fn [context value]
-        (let [v (ng-parse text)]
-          (.assign v context
-             (assoc (v context)
-                    (context-eval ks context)
-                    value))))
-      :else
-      (.-assign (ng-parse text)))))
+(def read-parse-cache (atom {}))
 
-(defn getter-setter [text]
-  (if (= \@(first text))
-    (let [text (cs/join "" (rest text))]
-      [(get-atom text)
-       (set-atom text)])
-    [(get-value text)
-     (set-value text)]))
+(defn ReadParseProvider []
+  (extend (js* "this")
+    :$get
+    (fn []
+      (fn [exp]
+        (cond
+          (string? exp) (if-let [p (@read-parse-cache exp)]
+                          p
+                          (let [p (read-parse exp)]
+                            (swap! read-parse-cache assoc exp p)
+                            p))
+          (fn? exp) exp
+          :else (fn [& _])))))
+  nil)
+
+; TODO: set 'ng' '$parse' provider
+
+(def ng (module "clang"))
+
+(def.provider ng $parse (AssignableParseProvider.))
+(def.provider ng $readParse (ReadParseProvider.))
