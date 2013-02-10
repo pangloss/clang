@@ -9,7 +9,7 @@
   (fn-symbol-map
     count str first last second ffirst rest next fnext nfirst nnext nthnext
     sort reverse deref rand rand-int > < >= <= not= inc dec max min nth get
-    clj->js not + - * / rem mod keys vals true? false? nil? = == ))
+    clj->js not + - * / rem mod keys vals true? false? nil? = == get-in))
 
 (defn function [sym]
   (if (keyword? sym)
