@@ -43,3 +43,7 @@
 
 
 (def amerge goog.object/extend)
+
+(defn extend [target & {:as m}]
+  (doseq [[k v] m]
+    (aset target (name k) v)))
