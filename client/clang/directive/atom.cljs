@@ -27,6 +27,8 @@
         :$dirty false
         :$valid true
         :$invalid false
+        :$connect (fn [ngModel form]
+                    (! ngModel :$setViewValue (! ctrl :$setViewValue)))
         :$name (! $attrs :name)
         ; Hopefully the input directives will set the $render fn for me
         :$render (fn [& _]
@@ -44,6 +46,7 @@
             (.addClass (:pristine css))))
         :$setViewValue
         (fn [value]
+          (? "set value" value)
           (! ctrl :$viewValue value)
           (when (! ctrl :$pristine)
             (extend ctrl :$dirty true :$pristine false)
@@ -77,17 +80,10 @@
     nil)))
 
 
-(def.directive m ngModel [$browser $sniffer]
+(def.directive m clangModel [$browser $sniffer]
   (js-obj
-    "require" ["ngModel", "^?form"]
+    "require" (array "clangModel" "ngModel" "^?form")
     "controller" model-controller
-    "terminal" true
-    "priority" 100
     "link"
-    (fn [scope element attr ctrls]
-      (let [this (first ctrls)]
-        (doseq [c (rest ctrls)]
-          (let [add (! c :$addControl)
-                remove (! c :$removeControl)]
-            (when add (add this))
-            (when remove (.bind element "$destroy" (fn []) (remove this)))))))))
+    (fn [scope element attr [clangModel ngModel form]]
+      (.$connect clangModel ngModel form))))

@@ -28,7 +28,7 @@
       [ <a href="" ng-click="archive()">archive</a> ]
       <ul class="unstyled">
         <li clang-repeat="todo in @todos">
-          <input type="checkbox" ng-model="@todos [$index :done]">
+          <input type="checkbox" ng-model="x" clang-model="@todos [$index :done]">
           <span class="done-{{:done todo}}">{{:text todo}}</span>
         </li>
       </ul>
