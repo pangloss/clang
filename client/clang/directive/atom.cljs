@@ -1,33 +1,15 @@
-(ns clang.directive.input
-  (:require-macros [clang.angular :refer [def.directive def.fn]])
+(ns clang.directive.clangAtom
+  (:require-macros [clang.angular :refer [def.directive def.controller fnj]])
   (:require clang.directive.interpolate
             [clang.parser :as p])
-  (:use [clang.util :only [? ! module]]))
+  (:use [clang.util :only [? ! module extend]]))
 
 (def m (module "clang"))
 
-(defn check-box [scope element attr ctrl $sniffer $browser]
-  (let [trueValue (or (! attr :ngTrueValue) true)
-        falseValue (or (! attr :ngFalseValue) false)]
-    (.bind element "click"
-       (fn [] (.$apply scope
-                 (fn []
-                   ; TODO: clojurize
-                   (.$setViewValue
-                      ctrl (! (first element) :checked))))))
-    (! ctrl :$render
-       (fn [] (! (first element) :checked
-                 ; TODO: clojurize
-                 (! ctrl :$viewValue))))
-    (.push (! ctrl :$formatters)
-       (fn [value] (= value trueValue)))
-    (.push (! ctrl :$parsers)
-       (fn [value] (if value trueValue falseValue)))))
+(def css {:valid "ng-valid" :invalid "ng-invalid"
+          :pristine "ng-pristine" :dirty "ng-dirty"})
 
-(def input-types {:checkbox check-box})
-
-
-(def atom-controller
+(def model-controller
   (fnj
     [$scope $exceptionHandler $attr $element $parse]
     (let [this (js* "this")
