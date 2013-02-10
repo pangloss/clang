@@ -36,7 +36,7 @@
               lastOrder (atom (array-map))
               prevValue (atom nil)]
           (.$watch scope
-             (p/parse $parse rhs)
+             (p/parse rhs)
              (fn clangRepeatWatch [new-val old-val scope]
                (let [collection (if (coll? new-val) new-val [])
                      arrayLength (count collection)

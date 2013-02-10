@@ -13,7 +13,7 @@
   (fnj
     [$scope $exceptionHandler $attrs $element $parse]
     (let [ctrl (js* "this")
-          [getfn setfn] (p/getter-setter $parse (! $attrs :ngModel))
+          [getfn setfn] (p/getter-setter (! $attrs :ngModel))
           parentForm (.inheritedData $element "$formController")
           invalid-count (atom 0)]
       (extend ctrl

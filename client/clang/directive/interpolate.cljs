@@ -13,14 +13,13 @@
 (def m (module "clang"))
 
 (def exception-handler (atom nil))
-(def ng-parse (atom nil))
 
 (defn plain-text [text]
   (fn [_] text))
 
 (defn close-and-parse [text]
   (let [[to-parse text] (cs/split text re-end 2)]
-    [(p/parse @ng-parse to-parse) (plain-text text)]))
+    [(p/parse to-parse) (plain-text text)]))
 
 (defn parse-sections [text]
   (let [[text & parts] (cs/split text re-start)]
@@ -47,7 +46,6 @@
 
 
 (def $get (fnj [$parse $exceptionHandler]
-  (reset! ng-parse $parse)
   (reset! exception-handler $exceptionHandler)
   interpolate))
 
