@@ -20,21 +20,93 @@
     (apply f args)
     (str (apply list sym args))))
 
-(defn context-eval [parser form context]
+(defn context-eval [ng-parse form context]
   (cond
     (list? form) (exec-list (first form)
                             (when-let [form (next form)]
-                              (map #(context-eval parser % context) form)))
-    (symbol? form) (or ((parser (name form)) context)
+                              (map #(context-eval ng-parse % context) form)))
+    (symbol? form) (or ((ng-parse (name form)) context)
                        form)
     :else form))
 
-(defn parse [ng-parse data]
-  (if-let [data (cond
-                  (re-find #"^:\S+$" data)   (str "(" data " $value)")
-                  (re-find #"^\(.*\)$" data) data
-                  (= \: (first data))        (str "(" data ")")
-                  (= \@ (first data))        data)]
-    (partial context-eval ng-parse (read-string data))
-    (ng-parse data)))
+(defn parse [ng-parse text]
+  (if-let [text (cond
+                  (re-find #"^:\S+$" text)   (str "(" text " $value)")
+                  (re-find #"^\(.*\)$" text) text
+                  (= \: (first text))        (str "(" text ")")
+                  (= \@ (first text))        text)]
+    (partial context-eval ng-parse (read-string text))
+    (ng-parse text)))
 
+(defn get-atom [ng-parse text]
+  (let [[a ks] (read-string (str "[" text "]"))]
+    (cond
+      (sequential? ks)
+      (fn [context]
+        (get-in @(context-eval ng-parse a context)
+                (map #(context-eval ng-parse % context) ks)))
+      ks
+      (fn [context]
+        (get @(context-eval ng-parse a context)
+             (context-eval ng-parse ks context)))
+      :else
+      (fn [context]
+        @(context-eval ng-parse a context)))))
+
+(defn set-atom [ng-parse text]
+  (let [[a ks] (read-string (str "[" text "]"))]
+    (cond
+      (sequential? ks)
+      (fn [context value]
+        (swap! (context-eval ng-parse a context)
+               assoc-in
+               (map #(context-eval ng-parse % context) ks)
+               value))
+      ks
+      (fn [context value]
+        (swap! (context-eval ng-parse a context)
+               assoc
+               (context-eval ng-parse ks context)
+               value))
+      :else
+      (fn [context value]
+        (reset! (context-eval ng-parse a context)
+                value)))))
+
+; To be settable, value must be on the scope, so it can't be a form
+(defn get-value [ng-parse text]
+  (let [[a ks] (read-string (str "[" text "]"))]
+    (cond
+      (sequential? ks)
+      (fn [context]
+        (get-in ((ng-parse text) context)
+                (map #(context-eval ng-parse % context) ks)))
+      ks
+      (fn [context]
+        (get ((ng-parse text) context)
+             (context-eval ng-parse ks context)))
+      :else
+      (ng-parse text))))
+
+; value must be on the scope, so it can't be a form
+;
+; get the value, assoc it and set the result
+(defn set-value [ng-parse text]
+  (let [[a ks] (read-string (str "[" text "]"))]
+    (cond
+      (sequential? ks)
+      (fn [context value]
+        (let [v (ng-parse text)]
+          (.assign v context
+             (assoc-in (v context)
+                       (map #(context-eval ng-parse % context) ks)
+                       value))))
+      ks
+      (fn [context value]
+        (let [v (ng-parse text)]
+          (.assign v context
+             (assoc (v context)
+                    (context-eval ng-parse ks context)
+                    value))))
+      :else
+      (.-assign (ng-parse text)))))
