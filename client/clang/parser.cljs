@@ -1,6 +1,7 @@
 (ns clang.parser
   (:use [clang.util :only [? ! module]])
-  (:require [cljs.reader :refer [read-string]])
+  (:require [cljs.reader :refer [read-string]]
+            [clojure.string :as cs])
   (:require-macros
     [clang.angular :refer [fn-symbol-map]]))
 
@@ -110,3 +111,11 @@
                     value))))
       :else
       (.-assign (ng-parse text)))))
+
+(defn getter-setter [ng-parse text]
+  (if (= \@(first text))
+    (let [text (cs/join "" (rest text))]
+      [(get-atom ng-parse text)
+       (set-atom ng-parse text)])
+    [(get-value ng-parse text)
+     (set-value ng-parse text)]))
