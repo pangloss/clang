@@ -6,10 +6,11 @@
     <link rel="stylesheet" href="css/clang.css">
   </head>
   <body>
-    <h2>Todo</h2>
+    <h2>Basic Todo sample with clojure data</h2>
     <div ng-controller="TodoCtrl">
       <span>{{remaining()}} of {{(count todos)}} remaining</span>
       [ <a href="" ng-click="archive()">archive</a> ]
+
       <ul class="unstyled">
         <li clang-repeat="todo in todos">
           <input type="checkbox" ng-model="todos [$index :done]">
@@ -23,6 +24,19 @@
       </form>
     </div>
     <hr />
+    <div ng-controller="TodoCtrl">
+      <h2>Function composition within template expressions</h2>
+      <table>
+        <tr clang-repeat="group in (drop 1 (partition 3 nums))">
+          <td clang-repeat="x in (map (juxt identity odd?) group)">
+            {{x}}: {{(first x)}} - {{(if (last x) "yes" "no")}}
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <hr />
+    <h2>Basic Todo sample with clojure data in atoms</h2>
     <div ng-controller="AtomTodoCtrl">
       <span>{{remaining()}} of {{(count @todos)}} remaining</span>
       [ <a href="" ng-click="archive()">archive</a> ]

@@ -14,6 +14,8 @@
             {:text "learn cljs" :done true}
             {:text "build an app" :done false}])
 
+  ($ nums (range 1 10))
+
   (defn.scope addTodo []
     ($ todos (conj ($ todos)
                    {:text ($ todoText) :done false}))
