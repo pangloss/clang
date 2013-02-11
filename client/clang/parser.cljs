@@ -7,12 +7,28 @@
 
 (def ng-parse (.get (.injector js/angular (array "ng")) "$parse"))
 
-(def fn-syms
-  (fn-symbol-map
-    count str first last second ffirst rest next fnext nfirst nnext nthnext
-    sort reverse deref rand rand-int > < >= <= not= inc dec max min nth get
-    clj->js not + - * / rem mod keys vals true? false? nil? = == get-in
-    even? odd? filter remove partition map take drop))
+(letfn
+  [(*if
+     ([c t] (if c t))
+     ([c t f] (if c t f)))
+   (*or [a b] (or a b))
+   (*and [a b] (and a b))
+   (*not [b] (not b))
+   (*when [c t] (when c t))
+   (*when-not [c f] (when-not c f))]
+  (let [if *if
+        or *or
+        and *and
+        not *not
+        when *when
+        when-not *when-not]
+    (def fn-syms
+      (fn-symbol-map
+        count str first last second ffirst rest next fnext nfirst nnext nthnext
+        sort reverse deref rand rand-int > < >= <= not= inc dec max min nth get
+        clj->js not + - * / rem mod keys vals true? false? nil? = == get-in
+        even? odd? filter remove partition map take drop juxt identity comp
+        if or and not when when-not))))
 
 (defn function [sym]
   (if (keyword? sym)
