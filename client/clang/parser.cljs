@@ -11,7 +11,8 @@
   (fn-symbol-map
     count str first last second ffirst rest next fnext nfirst nnext nthnext
     sort reverse deref rand rand-int > < >= <= not= inc dec max min nth get
-    clj->js not + - * / rem mod keys vals true? false? nil? = == get-in))
+    clj->js not + - * / rem mod keys vals true? false? nil? = == get-in
+    even? odd? filter remove partition map take drop))
 
 (defn function [sym]
   (if (keyword? sym)
@@ -28,8 +29,10 @@
     (list? form) (exec-list (first form)
                             (when-let [form (next form)]
                               (map #(context-eval % context) form)))
-    (symbol? form) (or ((ng-parse (name form)) context)
-                       form)
+    (symbol? form) (or (try
+                         ((ng-parse (name form)) context)
+                         (catch js/Error e nil))
+                       (fn-syms (name form) form))
     :else form))
 
 (defn get-atom [text [a ks]]
