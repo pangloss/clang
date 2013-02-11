@@ -4,9 +4,15 @@
   :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
-  :dependencies [[org.clojure/clojure "1.4.0"]]
+  :dependencies [[org.clojure/clojure "1.4.0"]
+                 [shegon "0.1.1"]]
   ;:source-paths ["comp/clojurescript/src/cljs"]
-  :plugins [[lein-cljsbuild "0.3.0"]]
+  :plugins [[lein-cljsbuild "0.3.0"]
+            [lein-shegon "0.1.1"]]
+
+  ; To get the shegon server:
+  ; CLASSPATH=./client:$CLASSPATH lein shegon
+  ; -> http://localhost:19000/
 
 
   :cljsbuild {:repl-launch-commands {"firefox" ; lein cljsbuild trampoline repl-launch firefox path/to/html

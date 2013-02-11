@@ -1,4 +1,4 @@
-(ns clang.todo
+(ns clang.sample.todo
   (:require-macros [clang.angular :refer [def.controller defn.scope $ def.filter fnj]])
   (:require [clojure.string :as cs]
             clang.directive.clangRepeat)
