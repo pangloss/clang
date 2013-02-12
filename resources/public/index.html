@@ -13,11 +13,11 @@
 
       <ul class="unstyled">
         <li clang-repeat="todo in todos">
-          <input type="email" ng-model="todos [$index :email]">
-          <input type="email" ng-model="todos [$index :email]">
-          <input type="checkbox" value="checked" ng-model="todos [$index :done]">
-          <input type="radio" value="true" ng-model="todos [$index :done]">
-          <input type="radio" value="false" ng-model="todos [$index :done]">
+          <input type="text" ng-model="todos [$index :email]">
+          <input type="text" ng-model="todos [$index :email]">
+          <input type="checkbox" ng-true-value="yes" ng-false-value="no" ng-model="todos [$index :done]">
+          <input type="radio" value="yes" ng-model="todos [$index :done]">
+          <input type="radio" value="no" ng-model="todos [$index :done]">
           <span class="done-{{:done}}">{{:text}}</span>
         </li>
       </ul>
@@ -26,7 +26,9 @@
                placeholder="add new todo here">
         <input class="btn-primary" type="submit" value="add">
       </form>
+      <pre>{{todos}}</pre>
     </div>
+
     <hr />
     <div ng-controller="TodoCtrl">
       <h2>Function composition within template expressions</h2>

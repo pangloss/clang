@@ -10,11 +10,19 @@
 ;;; This controller uses regular clojure data
 
 (def.controller m TodoCtrl [$scope]
-  ($ todos [{:text "learn angular" :done true}
-            {:text "learn cljs" :done true}
-            {:text "build an app" :done false}])
+  ($ todos [{:text "learn angular" :done "yes"}
+            {:text "learn cljs" :done "yes"}
+            {:text "build an app" :done "no"}])
 
   ($ nums (range 1 10))
+
+  ($ bool true)
+
+  (defn.scope negate [x]
+    (not x))
+
+  (defn.scope check_click []
+    (? "click check"))
 
   (defn.scope addTodo []
     ($ todos (conj ($ todos)
