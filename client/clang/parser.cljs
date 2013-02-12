@@ -104,23 +104,31 @@
 ;
 ; get the value, assoc it and set the result
 (defn set-value [text [a ks]]
-  (cond
+  ; Find the top context the value is present in, but if not found, then assign
+  ; the new var into the current context.
+  (letfn [(find-context* [getter context]
+            (when-let [parent (.-$parent context)]
+              (if (getter parent)
+                (recur getter parent)
+                context)))
+          (find-context [getter context]
+            (or (find-context* getter context) context))] (cond
     (sequential? ks)
     (fn [context value]
       (let [v (ng-parse (str a))]
-        (.assign v context
+        (.assign v (find-context v context)
            (assoc-in (v context)
                      (map #(context-eval % context) ks)
                      value))))
     ks
     (fn [context value]
       (let [v (ng-parse (str a))]
-        (.assign v context
+        (.assign v (find-context v context)
            (assoc (v context)
                   (context-eval ks context)
                   value))))
     :else
-    (.-assign (ng-parse text))))
+    (.-assign (ng-parse text)))))
 
 (defn assignable-parse [text]
   (letfn [(maybe-read [text]
