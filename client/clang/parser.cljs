@@ -152,8 +152,6 @@
 
 (def assignable-parse-cache (atom {}))
 
-; Should I create 2 parse providers, one for interpolations and another for ng-model, etc parsing?
-
 (defn AssignableParseProvider []
   (extend (js* "this")
     :$get
