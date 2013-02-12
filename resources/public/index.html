@@ -13,7 +13,11 @@
 
       <ul class="unstyled">
         <li clang-repeat="todo in todos">
-          <input type="checkbox" ng-model="todos [$index :done]">
+          <input type="email" ng-model="todos [$index :email]">
+          <input type="email" ng-model="todos [$index :email]">
+          <input type="checkbox" value="checked" ng-model="todos [$index :done]">
+          <input type="radio" value="true" ng-model="todos [$index :done]">
+          <input type="radio" value="false" ng-model="todos [$index :done]">
           <span class="done-{{:done}}">{{:text}}</span>
         </li>
       </ul>
