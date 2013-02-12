@@ -21,28 +21,33 @@
   (let [[to-parse text] (cs/split text re-end 2)]
     [(@parse to-parse) (plain-text text)]))
 
-(defn parse-sections [text]
+(defn parse-sections [text mustHaveExpression]
   (let [[text & parts] (cs/split text re-start)]
-    (concat [(plain-text text)]
-            (mapcat close-and-parse parts))))
+    (if (and mustHaveExpression (empty? parts))
+      nil
+      (concat [(plain-text text)]
+              (mapcat close-and-parse parts)))))
 
 (defn interpolate
+  ([text mustHaveExpression]
+   (let [parts (parse-sections text mustHaveExpression)
+         f (when parts
+             (fn [context]
+               (try
+                 (->> parts
+                   (map #(% context))
+                   (cs/join ""))
+                 (catch js/Error e
+                   #_(throw e)
+                   #_(? (str "error while interpolating '" text "'") e)
+                   (@exception-handler
+                     (js/Error. (str "error while interpolating '" text "'\n" (.toString e))))))))]
+     (when f
+       (aset f "exp" text)
+       (aset f "parts" parts)
+       f)))
   ([text]
-   (let [parts (parse-sections text)
-         f (fn [context]
-             (try
-               (->> parts
-                 (map #(% context))
-                 (cs/join ""))
-               (catch js/Error e
-                 #_(throw e)
-                 #_(? (str "error while interpolating '" text "'") e)
-                 (@exception-handler
-                   (js/Error. (str "error while interpolating '" text "'\n" (.toString e)))))))]
-     (aset f "exp" text)
-     (aset f "parts" parts)
-     f))
-  ([text mustHaveExpression] (interpolate text)))
+   (interpolate text false)))
 
 
 (def $get (fnj [$readParse $exceptionHandler]
