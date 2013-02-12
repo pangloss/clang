@@ -72,13 +72,15 @@
       (swap! (context-eval a context)
              assoc-in
              (map #(context-eval % context) ks)
-             value))
+             value)
+      value)
     ks
     (fn [context value]
       (swap! (context-eval a context)
              assoc
              (context-eval ks context)
-             value))
+             value)
+      value)
     :else
     (fn [context value]
       (reset! (context-eval a context)
@@ -89,11 +91,11 @@
   (cond
     (sequential? ks)
     (fn [context]
-      (get-in ((ng-parse text) context)
+      (get-in ((ng-parse (str a)) context)
               (map #(context-eval % context) ks)))
     ks
     (fn [context]
-      (get ((ng-parse text) context)
+      (get ((ng-parse (str a)) context)
            (context-eval ks context)))
     :else
     (ng-parse text)))
@@ -105,14 +107,14 @@
   (cond
     (sequential? ks)
     (fn [context value]
-      (let [v (ng-parse text)]
+      (let [v (ng-parse (str a))]
         (.assign v context
            (assoc-in (v context)
                      (map #(context-eval % context) ks)
                      value))))
     ks
     (fn [context value]
-      (let [v (ng-parse text)]
+      (let [v (ng-parse (str a))]
         (.assign v context
            (assoc (v context)
                   (context-eval ks context)
@@ -125,7 +127,8 @@
             (try
               (read-string (str "[" text "]"))
               (catch js/Error e
-                (? (? "failed to read: " text) e)
+                (? "failed to read" text)
+                (? "exception" e)
                 nil)))]
     (if (= \@(first text))
       (if-let [form (maybe-read (cs/join "" (rest text)))]
@@ -156,7 +159,6 @@
     :$get
     (fn []
       (fn [exp]
-        (when (string? exp) (? "app" exp))
         (cond
           (string? exp) (if-let [p (@assignable-parse-cache exp)]
                           p
@@ -175,7 +177,6 @@
     :$get
     (fn []
       (fn [exp]
-        (when (string? exp) (? "rpp" exp))
         (cond
           (string? exp) (if-let [p (@read-parse-cache exp)]
                           p
