@@ -8,7 +8,7 @@
   <body>
     <h2>Basic Todo sample with clojure data</h2>
     <div ng-controller="TodoCtrl">
-      <span>{{remaining()}} of {{(count todos)}} remaining</span>
+      <span>{{remaining()}} {{(archive)}} of {{(count todos)}} remaining</span>
       [ <a href="" ng-click="archive()">archive</a> ]
 
       <ul class="unstyled">
@@ -35,7 +35,7 @@
       <table>
         <tr clang-repeat="group in (drop 1 (partition 3 nums))">
           <td clang-repeat="x in (map (juxt identity odd?) group)">
-            {{x}}: {{(first x)}} - {{(if (last x) "yes" "no")}}
+            {{x}}: {{(first x)}} + 1 = {{addone(x)}} = {{(addone x)}}. {{(first x)}} is {{(if (last x) "odd" "even")}}
           </td>
         </tr>
       </table>
@@ -48,8 +48,10 @@
       [ <a href="" ng-click="archive()">archive</a> ]
       <ul class="unstyled">
         <li clang-repeat="todo in @todos">
-          <input type="checkbox" ng-model="@todos [$index :done]">
-          <span class="done-{{:done todo}}">{{:text todo}}</span>
+          <input type="text" ng-model="@todo :email">
+          <input type="text" ng-model="@todo :email">
+          <input type="checkbox" ng-model="@todo :done">
+          <span class="done-{{:done @todo}}">{{:text @todo}}</span>
         </li>
       </ul>
       <form ng-submit="addTodo()">

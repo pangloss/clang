@@ -18,8 +18,8 @@
 
   ($ bool true)
 
-  (defn.scope negate [x]
-    (not x))
+  (defn.scope addone [[x _]]
+    (+ 1 x))
 
   (defn.scope check_click []
     (? "click check"))
@@ -44,23 +44,22 @@
 ;;; This controller is identical but uses an atom for the todo data
 
 (def.controller m AtomTodoCtrl [$scope]
-  ($ todos (atom [{:text "learn angular" :done true}
-                  {:text "learn cljs" :done true}
-                  {:text "learn about software transactional memory" :done true}
-                  {:text "build an app" :done false}]))
+  ($ todos (atom [(atom {:text "learn angular" :done true})
+                  (atom {:text "learn cljs" :done true})
+                  (atom {:text "learn about software transactional memory" :done true})
+                  (atom {:text "build an app" :done false})]))
 
   (defn.scope addTodo []
     (swap! ($ todos)
-           conj {:text ($ todoText) :done false})
+           conj (atom {:text ($ todoText) :done false}))
     ($ todoText ""))
 
   (defn.scope remaining []
     (->> @($ todos)
-      (remove :done)
+      (remove (comp :done deref))
       count))
 
   (defn.scope archive []
-    (? "a2")
-    (swap! ($ todos) (partial remove :done))))
+    (swap! ($ todos) (partial remove (comp :done deref)))))
 
 
