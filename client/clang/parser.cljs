@@ -3,7 +3,7 @@
   (:require [cljs.reader :refer [read-string]]
             [clojure.string :as cs])
   (:require-macros
-    [clang.angular :refer [fnj def.provider fn-symbol-map]]))
+    [clang.angular :refer [fnj def.provider fn-symbol-map ??]]))
 
 (def ng-parse (.get (.injector js/angular (array "ng")) "$parse"))
 

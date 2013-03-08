@@ -58,3 +58,14 @@
   (->> syms
     (map (juxt name identity))
     (into {})))
+
+(defmacro ?? [& values]
+  `(.log js/console
+         ~@(mapcat (fn [v] (if (symbol? v)
+                             [(str (name v) ":")
+                              `(let [v# ~v]
+                                 (if (or (nil? v#) (coll? v#))
+                                   (pr-str v#)
+                                   v#))]
+                             [(name v)]))
+                   values)))
