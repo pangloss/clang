@@ -61,5 +61,3 @@
 
   (defn.scope archive []
     (swap! ($ todos) (partial remove (comp :done deref)))))
-
-
