@@ -1,5 +1,5 @@
 (ns clang.directive.clangRepeat
-  (:require-macros [clang.angular :refer [def.directive def.fn]])
+  (:require-macros [clang.angular :refer [def.directive def.fn ??]])
   (:require clang.directive.interpolate)
   (:use [clang.util :only [? ! module]]))
 

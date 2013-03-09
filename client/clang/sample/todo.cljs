@@ -19,23 +19,27 @@
   ($ bool true)
 
   (defn.scope addone [[x _]]
+    (? "addone")
     (+ 1 x))
 
   (defn.scope check_click []
+    (? "check_click")
     (? "click check"))
 
   (defn.scope addTodo []
+    (? "addTodo")
     ($ todos (conj ($ todos)
                    {:text ($ todoText) :done false}))
     ($ todoText ""))
 
   (defn.scope remaining []
+    (? "remaining")
     (->> ($ todos)
       (remove :done)
       count))
 
   (defn.scope archive []
-    (? "a1")
+    (? "archive")
     ($ todos (remove :done ($ todos)))))
 
 
@@ -50,14 +54,17 @@
                   (atom {:text "build an app" :done false})]))
 
   (defn.scope addTodo []
+    (? "addTodo2")
     (swap! ($ todos)
            conj (atom {:text ($ todoText) :done false}))
     ($ todoText ""))
 
   (defn.scope remaining []
+    (? "remaining2")
     (->> @($ todos)
       (remove (comp :done deref))
       count))
 
   (defn.scope archive []
+    (? "archive2")
     (swap! ($ todos) (partial remove (comp :done deref)))))

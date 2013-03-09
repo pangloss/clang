@@ -1,6 +1,6 @@
 (ns clang.directive.interpolate
   (:require-macros
-    [clang.angular :refer [def.value def.provider fnj]])
+    [clang.angular :refer [def.value def.provider fnj ??]])
   (:require [clojure.string :as cs])
   (:use [clang.util :only [? ! module]]))
 
