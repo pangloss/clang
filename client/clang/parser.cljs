@@ -30,13 +30,15 @@
         even? odd? filter remove partition map take drop juxt identity comp
         if or and not when when-not))))
 
-(defn function [sym]
+(defn function [sym context]
   (if (keyword? sym)
     sym
-    (fn-syms (name sym))))
+    (if-let [ctx-fn (aget context (name sym))]
+      (when (fn? ctx-fn) ctx-fn)
+      (fn-syms (name sym)))))
 
-(defn exec-list [sym args]
-  (if-let [f (function sym)]
+(defn exec-list [sym args context]
+  (if-let [f (function sym context)]
     (apply f args)
     (str (apply list sym args))))
 
@@ -49,7 +51,8 @@
   (cond
     (list? form) (exec-list (first form)
                             (when-let [form (next form)]
-                              (map #(context-eval % context) form)))
+                              (map #(context-eval % context) form))
+                            context)
     (symbol? form) (or (aget context (name form))
                        (fn-syms (name form)))
     :else form))
