@@ -19,7 +19,6 @@
   ($ bool true)
 
   (defn.scope addone [[x _]]
-    (? "addone")
     (+ 1 x))
 
   (defn.scope check_click []
@@ -33,7 +32,6 @@
     ($ todoText ""))
 
   (defn.scope remaining []
-    (? "remaining")
     (->> ($ todos)
       (remove :done)
       count))
@@ -60,7 +58,6 @@
     ($ todoText ""))
 
   (defn.scope remaining []
-    (? "remaining2")
     (->> @($ todos)
       (remove (comp :done deref))
       count))
