@@ -60,12 +60,14 @@
     (into {})))
 
 (defmacro ?? [& values]
-  `(.log js/console
-         ~@(mapcat (fn [v] (if (symbol? v)
-                             [(str (name v) ":")
-                              `(let [v# ~v]
-                                 (if (or (nil? v#) (coll? v#))
-                                   (pr-str v#)
-                                   v#))]
-                             [(name v)]))
-                   values)))
+  `(do (.log js/console
+             ~@(mapcat (fn [v] (cond
+                                 (or (string? v) (keyword? v)) [(name v)]
+                                 (symbol? v) [(str (name v) ":")
+                                              `(let [v# ~v]
+                                                 (if (or (nil? v#) (coll? v#))
+                                                   (pr-str v#)
+                                                   v#))]
+                                 :else [v]))
+                   values))
+       ~(last values)))
