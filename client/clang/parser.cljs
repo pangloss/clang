@@ -40,14 +40,17 @@
     (apply f args)
     (str (apply list sym args))))
 
-(defn context-eval [form context]
+(defn context-eval
+  "A partially applied version of this function will be returned when
+   an expression is parsed (or combined with other functions first) that
+   can then be applied with the context (i.e. scope) to get the actual
+   value or execute the expression"
+  [form context]
   (cond
     (list? form) (exec-list (first form)
                             (when-let [form (next form)]
                               (map #(context-eval % context) form)))
-    (symbol? form) (or (try
-                         ((ng-parse (name form)) context)
-                         (catch js/Error e nil))
+    (symbol? form) (or (aget context (name form))
                        (fn-syms (name form)))
     :else form))
 
