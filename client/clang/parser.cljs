@@ -48,7 +48,7 @@
     (symbol? form) (or (try
                          ((ng-parse (name form)) context)
                          (catch js/Error e nil))
-                       (fn-syms (name form) form))
+                       (fn-syms (name form)))
     :else form))
 
 (defn get-atom [text [a ks]]
