@@ -196,9 +196,7 @@
           :else (fn [& _])))))
   nil)
 
-; TODO: set 'ng' '$parse' provider
+(def clang (module "clang"))
 
-(def ng (module "clang"))
-
-(def.provider ng $parse (AssignableParseProvider.))
-(def.provider ng $readParse (ReadParseProvider.))
+(def.provider clang $parse (AssignableParseProvider.))
+(def.provider clang $readParse (ReadParseProvider.))
