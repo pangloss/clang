@@ -30,15 +30,16 @@
         even? odd? filter remove partition map take drop juxt identity comp
         if or and not when when-not))))
 
-(defn function [sym context]
-  (if (keyword? sym)
-    sym
-    (if-let [ctx-fn (aget context (name sym))]
-      (when (fn? ctx-fn) ctx-fn)
-      (fn-syms (name sym)))))
+(defn lookup-function [token context]
+  (cond
+    (keyword? token) token
+    (symbol? token) (if-let [ctx-fn (aget context (name token))]
+                      (when (fn? ctx-fn) ctx-fn)
+                      (fn-syms (name token)))
+    :else (throw (js/Error. (str "Can't look up function: " (prn-str token))))))
 
 (defn exec-list [sym args context]
-  (if-let [f (function sym context)]
+  (if-let [f (lookup-function sym context)]
     (apply f args)
     (str (apply list sym args))))
 
