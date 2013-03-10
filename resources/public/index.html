@@ -9,30 +9,33 @@
     <h2>Basic Todo sample with clojure data</h2>
     <div ng-controller="TodoCtrl">
       <span>{{(remaining)}} of {{(count todos)}} remaining</span>
-      [ <a href="" ng-click="(archive)">archive</a> ]
+      [ <a ng-click="(archive)">archive</a> ]
 
       <ul class="unstyled">
         <li clang-repeat="todo in todos">
-          <div>
+          <div ng-show="(odd? $index)">
+            <p>
+              Thes controls work because they are only bound to the
+              todos object and use update-in to modify it. That makes them
+              terrible for data entry.
+            </p>
             <input type="checkbox" ng-true-value="yes" ng-false-value="no" ng-model="todos [$index :done]">
             <span class="done-{{:done}}">{{:text}}</span>
-            <br>
-            These inputs don't work for data entry
-            <br>
             <input type="text" ng-model="todos [$index :email]">
             <input type="text" ng-model="todos [$index :email]">
           </div>
-          <div>
-            The following controls do work because they are only bound to the
-            local scope.
-            <br>
-            They would have to be explicitly persisted by the controller to be saved
-            <br>
+          <div ng-show="(even? $index)">
+            <p>
+              These controls work for data entry because they are only bound to the
+              local scope. They would have to be explicitly persisted by the
+              controller to be saved, so they are a bit more work to deal with.
+            </p>
             <input type="text" ng-model="todo :email">
             <input type="text" ng-model="todo :email">
             <input type="radio" value="yes" ng-model="todo :done">
             <input type="radio" value="no" ng-model="todo :done">
           </div>
+          <p>Local scope todo object: <pre>{{todo}}</pre></p>
         </li>
       </ul>
       <form ng-submit="(addTodo)">
@@ -40,23 +43,15 @@
                placeholder="add new todo here">
         <input class="btn-primary" type="submit" value="add">
       </form>
-      <pre>{{todos}}</pre>
-    </div>
-
-    <hr />
-    <div ng-controller="TodoCtrl">
-      <h2>Function composition within template expressions</h2>
-      <table>
-        <tr clang-repeat="group in (drop 1 (partition 3 nums))">
-          <td clang-repeat="x in (map (juxt identity odd?) group)">
-            {{x}}: {{(first x)}} + 1 = {{(addone x)}} = {{(addone x)}}. {{(first x)}} is {{(if (last x) "odd" "even")}}
-          </td>
-        </tr>
-      </table>
+      <p>The upper scope todos object: <pre>{{todos}}</pre></p>
     </div>
 
     <hr />
     <h2>Basic Todo sample with clojure data in atoms</h2>
+    <p>
+      Record-level atoms are the best solution for data entry because they work
+      fluidly in exactly the same way that regular scoped data in angular does.
+    </p>
     <div ng-controller="AtomTodoCtrl">
       <span>{{(remaining)}} of {{(count @todos)}} remaining</span>
       [ <a href="" ng-click="(archive)">archive</a> ]
@@ -74,5 +69,18 @@
         <input class="btn-primary" type="submit" value="add">
       </form>
     </div>
+
+    <hr />
+    <div ng-controller="TodoCtrl">
+      <h2>Function composition within template expressions</h2>
+      <table>
+        <tr clang-repeat="group in (drop 1 (partition 3 nums))">
+          <td clang-repeat="x in (map (juxt identity odd?) group)">
+            {{x}}: {{(first x)}} + 1 = {{(addone x)}} = {{(addone x)}}. {{(first x)}} is {{(if (last x) "odd" "even")}}
+          </td>
+        </tr>
+      </table>
+    </div>
+
   </body>
 </html>

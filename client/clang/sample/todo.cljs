@@ -32,13 +32,19 @@
     ($ todoText ""))
 
   (defn.scope remaining []
-    (->> ($ todos)
-      (remove :done)
+    (->>
+      ($ todos)
+      (map :done)
+      (remove #{"yes"})
       count))
 
   (defn.scope archive []
     (? "archive")
-    ($ todos (remove :done ($ todos)))))
+    ($ todos
+       (->>
+         ($ todos)
+         (map :done)
+         (remove #{"yes"})))))
 
 
 
