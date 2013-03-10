@@ -8,33 +8,34 @@
   <body>
     <h2>Basic Todo sample with clojure data</h2>
     <div ng-controller="TodoCtrl">
-      <span>{{remaining()}} {{(archive)}} of {{(count todos)}} remaining</span>
-      [ <a href="" ng-click="archive()">archive</a> ]
+      <span>{{(remaining)}} of {{(count todos)}} remaining</span>
+      [ <a href="" ng-click="(archive)">archive</a> ]
 
       <ul class="unstyled">
         <li clang-repeat="todo in todos">
-        <div>
-          <input type="checkbox" ng-true-value="yes" ng-false-value="no" ng-model="todos [$index :done]">
-          <span class="done-{{:done}}">{{:text}}</span>
-          <br>
-          These inputs don't work for data entry
-          <br>
-          <input type="text" ng-model="todos [$index :email]">
-          <input type="text" ng-model="todos [$index :email]">
-        </div>
-        <div>
-          The following controls do work because they are only bound to the
-          local scope.
-          <br>
-          They would have to be explicitly persisted by the controller to be saved
-          <br>
-          <input type="text" ng-model="todo :email">
-          <input type="text" ng-model="todo :email">
-          <input type="radio" value="yes" ng-model="todo :done">
-          <input type="radio" value="no" ng-model="todo :done">
+          <div>
+            <input type="checkbox" ng-true-value="yes" ng-false-value="no" ng-model="todos [$index :done]">
+            <span class="done-{{:done}}">{{:text}}</span>
+            <br>
+            These inputs don't work for data entry
+            <br>
+            <input type="text" ng-model="todos [$index :email]">
+            <input type="text" ng-model="todos [$index :email]">
+          </div>
+          <div>
+            The following controls do work because they are only bound to the
+            local scope.
+            <br>
+            They would have to be explicitly persisted by the controller to be saved
+            <br>
+            <input type="text" ng-model="todo :email">
+            <input type="text" ng-model="todo :email">
+            <input type="radio" value="yes" ng-model="todo :done">
+            <input type="radio" value="no" ng-model="todo :done">
+          </div>
         </li>
       </ul>
-      <form ng-submit="addTodo()">
+      <form ng-submit="(addTodo)">
         <input type="text" ng-model="todoText"  size="30"
                placeholder="add new todo here">
         <input class="btn-primary" type="submit" value="add">
@@ -48,7 +49,7 @@
       <table>
         <tr clang-repeat="group in (drop 1 (partition 3 nums))">
           <td clang-repeat="x in (map (juxt identity odd?) group)">
-            {{x}}: {{(first x)}} + 1 = {{addone(x)}} = {{(addone x)}}. {{(first x)}} is {{(if (last x) "odd" "even")}}
+            {{x}}: {{(first x)}} + 1 = {{(addone x)}} = {{(addone x)}}. {{(first x)}} is {{(if (last x) "odd" "even")}}
           </td>
         </tr>
       </table>
@@ -57,8 +58,8 @@
     <hr />
     <h2>Basic Todo sample with clojure data in atoms</h2>
     <div ng-controller="AtomTodoCtrl">
-      <span>{{remaining()}} of {{(count @todos)}} remaining</span>
-      [ <a href="" ng-click="archive()">archive</a> ]
+      <span>{{(remaining)}} of {{(count @todos)}} remaining</span>
+      [ <a href="" ng-click="(archive)">archive</a> ]
       <ul class="unstyled">
         <li clang-repeat="todo in @todos">
           <input type="text" ng-model="@todo :email">
@@ -67,7 +68,7 @@
           <span class="done-{{:done @todo}}">{{:text @todo}}</span>
         </li>
       </ul>
-      <form ng-submit="addTodo()">
+      <form ng-submit="(addTodo)">
         <input type="text" ng-model="todoText"  size="30"
                placeholder="add new todo here">
         <input class="btn-primary" type="submit" value="add">

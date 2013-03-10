@@ -3,7 +3,7 @@
   (:require [cljs.reader :refer [read-string]]
             [clojure.string :as cs])
   (:require-macros
-    [clang.angular :refer [fnj def.provider fn-symbol-map]]))
+    [clang.angular :refer [fnj def.provider fn-symbol-map ??]]))
 
 (def ng-parse (.get (.injector js/angular (array "ng")) "$parse"))
 
@@ -30,25 +30,32 @@
         even? odd? filter remove partition map take drop juxt identity comp
         if or and not when when-not))))
 
-(defn function [sym]
-  (if (keyword? sym)
-    sym
-    (fn-syms (name sym))))
+(defn lookup-function [token context]
+  (cond
+    (keyword? token) token
+    (symbol? token) (if-let [ctx-fn (aget context (name token))]
+                      (when (fn? ctx-fn) ctx-fn)
+                      (fn-syms (name token)))
+    :else (throw (js/Error. (str "Can't look up function: " (prn-str token))))))
 
-(defn exec-list [sym args]
-  (if-let [f (function sym)]
+(defn exec-list [sym args context]
+  (if-let [f (lookup-function sym context)]
     (apply f args)
     (str (apply list sym args))))
 
-(defn context-eval [form context]
+(defn context-eval
+  "A partially applied version of this function will be returned when
+   an expression is parsed (or combined with other functions first) that
+   can then be applied with the context (i.e. scope) to get the actual
+   value or execute the expression"
+  [form context]
   (cond
     (list? form) (exec-list (first form)
                             (when-let [form (next form)]
-                              (map #(context-eval % context) form)))
-    (symbol? form) (or (try
-                         ((ng-parse (name form)) context)
-                         (catch js/Error e nil))
-                       (fn-syms (name form) form))
+                              (map #(context-eval % context) form))
+                            context)
+    (symbol? form) (or (aget context (name form))
+                       (fn-syms (name form)))
     :else form))
 
 (defn get-atom [text [a ks]]
@@ -130,25 +137,6 @@
     :else
     (.-assign (ng-parse text)))))
 
-(defn assignable-parse [text]
-  (letfn [(maybe-read [text]
-            (try
-              (read-string (str "[" text "]"))
-              (catch js/Error e
-                (? "failed to read" text)
-                (? "exception" e)
-                nil)))]
-    (if (= \@(first text))
-      (if-let [form (maybe-read (cs/join "" (rest text)))]
-        [(get-atom text form)
-         (set-atom text form)]
-        nil)
-      (if-let [form (maybe-read text)]
-        [(get-value text form)
-         (set-value text form)]
-        (let [p (ng-parse text)]
-          [p (! p :assign)])))))
-
 (defn read-parse [text]
   (if-let [text (cond
                   (re-find #"^:\S+$" text)   (str "(" text " $value)")
@@ -157,6 +145,29 @@
                   (= \@ (first text))        text)]
     (partial context-eval (read-string text))
     (ng-parse text)))
+
+(defn assignable-parse [text]
+  (letfn [(maybe-read [text]
+            (try
+              (read-string (str "[" text "]"))
+              (catch js/Error e
+                (? "failed to read" text)
+                (? "exception" e)
+                nil)))]
+    (cond
+      (= \@ (first text))
+        (if-let [form (maybe-read (cs/join "" (rest text)))]
+          [(get-atom text form)
+           (set-atom text form)]
+          nil)
+      (re-find #"^\s*\(.*\)\s*$" text)
+        [(read-parse text) nil]
+      :else
+        (if-let [form (maybe-read text)]
+          [(get-value text form)
+           (set-value text form)]
+          (let [p (ng-parse text)]
+            [p (! p :assign)])))))
 
 (def assignable-parse-cache (atom {}))
 
@@ -193,9 +204,7 @@
           :else (fn [& _])))))
   nil)
 
-; TODO: set 'ng' '$parse' provider
+(def clang (module "clang"))
 
-(def ng (module "clang"))
-
-(def.provider ng $parse (AssignableParseProvider.))
-(def.provider ng $readParse (ReadParseProvider.))
+(def.provider clang $parse (AssignableParseProvider.))
+(def.provider clang $readParse (ReadParseProvider.))

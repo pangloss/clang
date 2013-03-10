@@ -1,6 +1,6 @@
 (ns clang.directive.interpolate
   (:require-macros
-    [clang.angular :refer [def.value def.provider fnj]])
+    [clang.angular :refer [def.value def.provider fnj ??]])
   (:require [clojure.string :as cs])
   (:use [clang.util :only [? ! module]]))
 
@@ -38,10 +38,9 @@
                    (map #(% context))
                    (cs/join ""))
                  (catch js/Error e
-                   #_(throw e)
-                   #_(? (str "error while interpolating '" text "'") e)
                    (@exception-handler
-                     (js/Error. (str "error while interpolating '" text "'\n" (.toString e))))))))]
+                     (js/Error. (str "error while interpolating '" text "'\n"
+                                     " --> " (.toString e))))))))]
      (when f
        (aset f "exp" text)
        (aset f "parts" parts)
