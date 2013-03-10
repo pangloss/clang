@@ -137,25 +137,6 @@
     :else
     (.-assign (ng-parse text)))))
 
-(defn assignable-parse [text]
-  (letfn [(maybe-read [text]
-            (try
-              (read-string (str "[" text "]"))
-              (catch js/Error e
-                (? "failed to read" text)
-                (? "exception" e)
-                nil)))]
-    (if (= \@(first text))
-      (if-let [form (maybe-read (cs/join "" (rest text)))]
-        [(get-atom text form)
-         (set-atom text form)]
-        nil)
-      (if-let [form (maybe-read text)]
-        [(get-value text form)
-         (set-value text form)]
-        (let [p (ng-parse text)]
-          [p (! p :assign)])))))
-
 (defn read-parse [text]
   (if-let [text (cond
                   (re-find #"^:\S+$" text)   (str "(" text " $value)")
@@ -164,6 +145,29 @@
                   (= \@ (first text))        text)]
     (partial context-eval (read-string text))
     (ng-parse text)))
+
+(defn assignable-parse [text]
+  (letfn [(maybe-read [text]
+            (try
+              (read-string (str "[" text "]"))
+              (catch js/Error e
+                (? "failed to read" text)
+                (? "exception" e)
+                nil)))]
+    (cond
+      (= \@ (first text))
+        (if-let [form (maybe-read (cs/join "" (rest text)))]
+          [(get-atom text form)
+           (set-atom text form)]
+          nil)
+      (re-find #"^\s*\(.*\)\s*$" text)
+        [(read-parse text) nil]
+      :else
+        (if-let [form (maybe-read text)]
+          [(get-value text form)
+           (set-value text form)]
+          (let [p (ng-parse text)]
+            [p (! p :assign)])))))
 
 (def assignable-parse-cache (atom {}))
 
