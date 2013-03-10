@@ -1,5 +1,5 @@
 (ns clang.sample.todo
-  (:require-macros [clang.angular :refer [def.controller defn.scope $ def.filter fnj]])
+  (:require-macros [clang.angular :refer [def.controller defn.scope scope! def.filter fnj]])
   (:require [clojure.string :as cs]
             clang.directive.clangRepeat)
   (:use [clang.util :only [? ! module]]))
@@ -10,13 +10,13 @@
 ;;; This controller uses regular clojure data
 
 (def.controller m TodoCtrl [$scope]
-  ($ todos [{:text "learn angular" :done "yes"}
-            {:text "learn cljs" :done "yes"}
-            {:text "build an app" :done "no"}])
+  (scope! todos [{:text "learn angular" :done "yes"}
+                 {:text "learn cljs" :done "yes"}
+                 {:text "build an app" :done "no"}])
 
-  ($ nums (range 1 10))
+  (scope! nums (range 1 10))
 
-  ($ bool true)
+  (scope! bool true)
 
   (defn.scope addone [[x _]]
     (+ 1 x))
@@ -27,24 +27,24 @@
 
   (defn.scope addTodo []
     (? "addTodo")
-    ($ todos (conj ($ todos)
-                   {:text ($ todoText) :done false}))
-    ($ todoText ""))
+    (scope! todos (conj (scope! todos)
+                        {:text (scope! todoText) :done false}))
+    (scope! todoText ""))
 
   (defn.scope remaining []
     (->>
-      ($ todos)
+      (scope! todos)
       (map :done)
       (remove #{"yes"})
       count))
 
   (defn.scope archive []
     (? "archive")
-    ($ todos
-       (->>
-         ($ todos)
-         (map :done)
-         (remove #{"yes"})))))
+    (scope! todos
+            (->>
+              (scope! todos)
+              (map :done)
+              (remove #{"yes"})))))
 
 
 
@@ -52,22 +52,22 @@
 ;;; This controller is identical but uses an atom for the todo data
 
 (def.controller m AtomTodoCtrl [$scope]
-  ($ todos (atom [(atom {:text "learn angular" :done true})
-                  (atom {:text "learn cljs" :done true})
-                  (atom {:text "learn about software transactional memory" :done true})
-                  (atom {:text "build an app" :done false})]))
+  (scope! todos (atom [(atom {:text "learn angular" :done true})
+                       (atom {:text "learn cljs" :done true})
+                       (atom {:text "learn about software transactional memory" :done true})
+                       (atom {:text "build an app" :done false})]))
 
   (defn.scope addTodo []
     (? "addTodo2")
-    (swap! ($ todos)
-           conj (atom {:text ($ todoText) :done false}))
-    ($ todoText ""))
+    (swap! (scope! todos)
+           conj (atom {:text (scope! todoText) :done false}))
+    (scope! todoText ""))
 
   (defn.scope remaining []
-    (->> @($ todos)
-      (remove (comp :done deref))
-      count))
+    (->> @(scope! todos)
+         (remove (comp :done deref))
+         count))
 
   (defn.scope archive []
     (? "archive2")
-    (swap! ($ todos) (partial remove (comp :done deref)))))
+    (swap! (scope! todos) (partial remove (comp :done deref)))))

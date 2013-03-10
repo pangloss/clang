@@ -6,7 +6,7 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.4.0"]
                  [shegon "0.1.1"]]
-  ;:source-paths ["comp/clojurescript/src/cljs"]
+  :source-paths ["client"]
   :plugins [[lein-cljsbuild "0.3.0"]
             [lein-shegon "0.1.1"]]
 
@@ -32,19 +32,19 @@
 
               :builds
               {:dev
-               {:source-paths ["client"]
+               {:source-paths ["client" "sample"]
                 :compiler {:output-to "resources/public/js/clang_dbg.js"
                            :optimizations :whitespace
                            :pretty-print true}}
 
                :prod
-               {:source-paths ["client"]
+               {:source-paths ["client" "sample"]
                 :compiler {:output-to "resources/public/js/clang.js"
                            :pretty-print false
                            :optimizations :advanced}}
 
                :pre-prod
-               {:source-paths ["client"]
+               {:source-paths ["client" "sample"]
 
                 :compiler {:output-to "resources/public/js/clang_pre.js"
                            :optimizations :simple

@@ -46,7 +46,7 @@
   `(aset ~'$scope ~(name n) (fn ~args ~@body)))
 
 ; Gets or sets a value to a $scope variable
-(defmacro $
+(defmacro scope!
   ([k]
    (let [k (if (coll? k) (map name k) (name k))]
      `(clang.util/! ~'$scope ~k)))
