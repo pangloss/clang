@@ -10,7 +10,14 @@
   `(.controller ~module ~(name n) (fnj ~args ~@body)))
 
 (defmacro def.directive [module n args & body]
-  `(.directive ~module ~(name n) (fnj ~args ~@body)))
+  (let [body (if (map? (last body))
+               (conj (pop body) `(reduce (fn [obj# [k# v#]]
+                                           (aset obj# (name k#) v#)
+                                           obj#)
+                                         (js-obj)
+                                         ~(last body)))
+               body)]
+    `(.directive ~module ~(name n) (fnj ~args ~@body))))
 
 (defmacro def.factory [module n args & body]
   `(.factory ~module ~(name n) (fnj ~args ~@body)))
@@ -53,6 +60,14 @@
   ([k v]
    (let [k (if (coll? k) (map name k) (name k))]
      `(clang.util/! ~'$scope ~k ~v))))
+
+(defmacro root!
+  ([k]
+   (let [k (if (coll? k) (map name k) (name k))]
+     `(clang.util/! ~'$rootScope ~k)))
+  ([k v]
+   (let [k (if (coll? k) (map name k) (name k))]
+     `(clang.util/! ~'$rootScope ~k ~v))))
 
 (defmacro fn-symbol-map [& syms]
   (->> syms
