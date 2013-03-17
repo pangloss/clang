@@ -7,7 +7,8 @@ ClojureScript well integrated with the [AngularJS](http://angularjs.org/) framew
 Clang includes an unmodified current release of AngularJS. It allows you
 to use ClojureScript data structures throughout your angular app and
 simplifies writing your controllers and directives, etc according to
-Angular's best practices.
+Angular's best practices. Clang integrates ClojureScript into all of
+Angular's built-in directives.
 
 ## How?
 
