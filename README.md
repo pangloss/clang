@@ -28,14 +28,14 @@ Here are a couple of bits of code clipped from the sample index.html
 This bit calls the `remaining` function from the scope and applies the
 built-in `count` function to the `todos` vector:
 
-```
+```html
       <span>{{(remaining)}} of {{(count todos)}} remaining</span>
       [ <a ng-click="(archive)">archive</a> ]
 ```
 
 The relevant controller definitions:
 
-```
+```clojure
 (def.controller m TodoCtrl [$scope]
   (scope! todos [{:text "learn angular" :done "yes"}
                  {:text "learn cljs" :done "yes"}
@@ -50,7 +50,7 @@ The relevant controller definitions:
 
 Here's a slightly silly but kind of awesome example of building a table:
 
-```
+```html
       <table>
         <tr clang-repeat="group in (drop 1 (partition 3 nums))">
           <td clang-repeat="x in (map (juxt identity odd?) group)">
@@ -62,7 +62,7 @@ Here's a slightly silly but kind of awesome example of building a table:
 
 The relevant controller definitions:
 
-```
+```clojure
 (def.controller m TodoCtrl [$scope]
   (scope! nums (range 1 10)))
 ```
