@@ -22,6 +22,9 @@
 (defmacro def.factory [module n args & body]
   `(.factory ~module ~(name n) (fnj ~args ~@body)))
 
+(defmacro def.config [module args & body]
+  `(.config ~module (fnj ~args ~@body)))
+
 (defmacro def.constant [module n value]
   `(.constant ~module ~(name n) ~value))
 
@@ -51,23 +54,6 @@
 ; Defines a function on the current $scope
 (defmacro defn.scope [n args & body]
   `(aset ~'$scope ~(name n) (fn ~args ~@body)))
-
-; Gets or sets a value to a $scope variable
-(defmacro scope!
-  ([k]
-   (let [k (if (coll? k) (map name k) (name k))]
-     `(clang.util/! ~'$scope ~k)))
-  ([k v]
-   (let [k (if (coll? k) (map name k) (name k))]
-     `(clang.util/! ~'$scope ~k ~v))))
-
-(defmacro root!
-  ([k]
-   (let [k (if (coll? k) (map name k) (name k))]
-     `(clang.util/! ~'$rootScope ~k)))
-  ([k v]
-   (let [k (if (coll? k) (map name k) (name k))]
-     `(clang.util/! ~'$rootScope ~k ~v))))
 
 (defmacro fn-symbol-map [& syms]
   (->> syms

@@ -1,5 +1,5 @@
 (ns clang.parser
-  (:use [clang.util :only [? ! module extend]])
+  (:use [clang.util :only [? module]])
   (:require [cljs.reader :refer [read-string]]
             [clojure.string :as cs])
   (:require-macros
@@ -167,12 +167,12 @@
           [(get-value text form)
            (set-value text form)]
           (let [p (ng-parse text)]
-            [p (! p :assign)])))))
+            [p (:assign p)])))))
 
 (def assignable-parse-cache (atom {}))
 
 (defn AssignableParseProvider []
-  (extend (js* "this")
+  (assoc! (js* "this")
     :$get
     (fn []
       (fn [exp]
@@ -190,7 +190,7 @@
 (def read-parse-cache (atom {}))
 
 (defn ReadParseProvider []
-  (extend (js* "this")
+  (assoc! (js* "this")
     :$get
     (fn []
       (fn [exp]

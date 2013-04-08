@@ -1,24 +1,5 @@
-(ns clang.util)
-
-(defn !
-  ([target n]
-   (if (coll? n)
-     (let [[n & nn] n]
-       (if (seq nn)
-         (recur (! target n) nn)
-         (recur target n)))
-     (aget target (name n))))
-  ([target n value]
-   (if (coll? n)
-     (let [[n & nn] n]
-       (if (seq nn)
-         (recur (or (! target n)
-                    (let [x (js-obj)]
-                      (! target n x)
-                      x))
-                nn value)
-         (recur target n value)))
-     (aset target (name n) value))))
+(ns clang.util
+  (:refer-clojure :exclude [assoc!]))
 
 (defn ?
   ([x] (if (coll? x)
@@ -48,6 +29,20 @@
 
 (def amerge goog.object/extend)
 
-(defn extend [target & {:as m}]
-  (doseq [[k v] m]
-    (aset target (name k) v)))
+(defn assoc!
+  "Transient associate allowing multiple k/v pairs.
+
+   Replaces cljs.core/assoc!"
+  ([tcoll k v]
+     (-assoc! tcoll k v))
+  ([tcoll k v & kvs]
+     (let [ret (assoc! tcoll k v)]
+       (if kvs
+         (recur ret (first kvs) (second kvs) (nnext kvs))
+         ret))))
+
+(defn update-in!
+  ([m [k & ks] f & args]
+     (if ks
+       (assoc! m k (apply update-in! (get m k) ks f args))
+       (assoc! m k (apply f (get m k) args)))))
