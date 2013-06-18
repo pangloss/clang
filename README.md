@@ -37,12 +37,12 @@ The relevant controller definitions:
 
 ```clojure
 (def.controller m TodoCtrl [$scope]
-  (scope! todos [{:text "learn angular" :done "yes"}
-                 {:text "learn cljs" :done "yes"}
-                 {:text "build an app" :done "no"}])
+  (assoc! $scope :todos [{:text "learn angular" :done "yes"}
+                         {:text "learn cljs" :done "yes"}
+                         {:text "build an app" :done "no"}])
   (defn.scope remaining []
     (->>
-      (scope! todos)
+      (:todos $scope)
       (map :done)
       (remove #{"yes"})
       count)))
@@ -64,7 +64,7 @@ The relevant controller definitions:
 
 ```clojure
 (def.controller m TodoCtrl [$scope]
-  (scope! nums (range 1 10)))
+  (assoc! $scope :nums (range 1 10)))
 ```
 
 ## Leiningen Dependency
