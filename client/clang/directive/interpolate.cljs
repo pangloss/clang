@@ -1,8 +1,9 @@
 (ns clang.directive.interpolate
   (:require-macros
     [clang.angular :refer [def.value def.provider fnj ??]])
-  (:require [clojure.string :as cs])
-  (:use [clang.util :only [? ! module]]))
+  (:require
+   [clojure.string :as cs]
+   [clang.util :refer [? module]]))
 
 (def re-start #"\{\{ ?")
 (def re-end #" ?}}")
