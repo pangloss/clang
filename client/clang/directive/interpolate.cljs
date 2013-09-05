@@ -5,8 +5,8 @@
    [clojure.string :as cs]
    [clang.util :refer [? module]]))
 
-(def re-start #"\{\{ ?")
-(def re-end #" ?}}")
+(def re-start #"\{\{ *")
+(def re-end #" *}}")
 
 (def m (module "clang"))
 
