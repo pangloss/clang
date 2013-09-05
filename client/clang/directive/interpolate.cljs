@@ -5,7 +5,7 @@
   (:use [clang.util :only [? ! module]]))
 
 (def re-start #"\{\{ ?")
-(def re-end #"? }}")
+(def re-end #" ?}}")
 
 (def m (module "clang"))
 
