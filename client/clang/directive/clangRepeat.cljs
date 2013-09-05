@@ -1,7 +1,7 @@
 (ns clang.directive.clangRepeat
   (:require-macros [clang.angular :refer [def.directive def.fn ??]])
   (:require clang.directive.interpolate)
-  (:use [clang.util :only [? ! module]]))
+  (:use [clang.util :only [? module]]))
 
 (def m (module "clang"))
 
@@ -61,7 +61,7 @@
                        (swap! lastOrder dissoc value)
                        (swap! nextOrder assoc value last)
                        (when-not (= index (:index last))
-                         (! last :index index)
+                         (assoc! last :index index)
                          (.after @cursor (:element last)))
                        (reset! cursor (:element last))
                        (populate-scope (:scope last) index value))
