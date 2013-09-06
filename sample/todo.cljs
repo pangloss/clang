@@ -12,8 +12,8 @@
 
 (def.controller m TodoCtrl [$scope]
   (assoc! $scope :todos [{:text "learn angular" :done "yes"}
-                        {:text "learn cljs" :done "yes"}
-                        {:text "build an app" :done "no"}])
+                         {:text "learn cljs" :done "yes"}
+                         {:text "build an app" :done "no"}])
 
   (assoc! $scope :nums (range 1 10))
 
@@ -29,23 +29,23 @@
   (defn.scope addTodo []
     (? "addTodo")
     (assoc! $scope :todos (conj (:todos $scope)
-                        {:text (:todoText $scope) :done false}))
+                                {:text (:todoText $scope) :done false}))
     (assoc! $scope :todoText ""))
 
   (defn.scope remaining []
     (->>
-      (:todos $scope)
-      (map :done)
-      (remove #{"yes"})
-      count))
+     (:todos $scope)
+     (map :done)
+     (remove #{"yes"})
+     count))
 
   (defn.scope archive []
     (? "archive")
     (assoc! $scope :todos
             (->>
-              (:todos $scope)
-              (map :done)
-              (remove #{"yes"})))))
+             (:todos $scope)
+             (map :done)
+             (remove #{"yes"})))))
 
 
 
@@ -54,9 +54,9 @@
 
 (def.controller m AtomTodoCtrl [$scope]
   (assoc! $scope :todos (atom [(atom {:text "learn angular" :done true})
-                       (atom {:text "learn cljs" :done true})
-                       (atom {:text "learn about software transactional memory" :done true})
-                       (atom {:text "build an app" :done false})]))
+                               (atom {:text "learn cljs" :done true})
+                               (atom {:text "learn about software transactional memory" :done true})
+                               (atom {:text "build an app" :done false})]))
 
   (defn.scope addTodo []
     (? "addTodo2")
