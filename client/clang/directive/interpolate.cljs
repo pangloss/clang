@@ -4,8 +4,8 @@
   (:require [clojure.string :as cs])
   (:use [clang.util :only [? ! module]]))
 
-(def re-start #"\{\{ ?")
-(def re-end #"? }}")
+(def re-start #"\{\{ *")
+(def re-end #" *}}")
 
 (def m (module "clang"))
 
