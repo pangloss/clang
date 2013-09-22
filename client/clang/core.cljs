@@ -1,4 +1,5 @@
 (ns clang.core
-  (:require clang.js-types
+  (:require clobber.core
+            clobber.browser
             clang.parser
             clang.directive.clangRepeat))
