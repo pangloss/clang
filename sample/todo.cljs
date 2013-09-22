@@ -1,7 +1,8 @@
 (ns clang.sample.todo
   (:require-macros [clang.angular :refer [def.controller defn.scope def.filter fnj]])
   (:require [clojure.string :as cs]
-            clang.js-types
+            clobber.core
+            clobber.browser
             clang.directive.clangRepeat)
   (:use [clang.util :only [? module]]))
 
